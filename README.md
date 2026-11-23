@@ -9,6 +9,8 @@ Web app d'entraînement aux échecs pour enfants, univers chevaliers. Fonctionne
 - Conseil de guerre : après la partie, les coups clés rejoués avec la flèche du meilleur coup
 - Mode connecté (facultatif) : avec une clé d'API Claude saisie dans le blason, le maître d'armes explique les erreurs en mots d'enfant
 - Hauts faits qui débloquent des jeux de pièces et des échiquiers
+- Étoiles, quête du jour avec son coffre, carte du royaume à conquérir, joute de 3 minutes
+- Tournoi contre des chevaliers nommés, finales à gagner, jokers pour annuler un coup (Page et Écuyer)
 - Blason : grades de Page à Duc, maîtrise par thème, historique (sauvegardé sur l'appareil)
 
 ## Installer sur la tablette

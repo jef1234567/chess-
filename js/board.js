@@ -85,7 +85,7 @@ function marquerEchec(){
 }
 function basculeRoi(couleur){ // échec et mat : le roi vaincu tombe
   if(REDUIT())return;
-  for(const[,e]of Object.entries(pieces)){if(!e.classList.contains(couleur))continue;const c=e.firstElementChild;
+  for(const e of Object.values(pieces)){if(!e||!e.classList.contains(couleur))continue;const c=e.firstElementChild;
     if(c&&/[kK]\.svg|♚/.test(c.outerHTML)){c.style.transformOrigin="50% 92%";
       c.animate([{transform:"none"},{transform:"rotate(-12deg)",offset:.3},{transform:"rotate(80deg) translateY(8%)",offset:.8},{transform:"rotate(74deg) translateY(8%)"}],{duration:900,easing:"cubic-bezier(.5,0,.6,1)",fill:"forwards"});}}
 }
@@ -100,7 +100,7 @@ function animMove(m){
   const e=pieces[m.from];
   const capSq=m.captured?(m.flags.includes("e")?m.to[0]+m.from[1]:m.to):null;
   const cap=capSq&&pieces[capSq];if(cap)delete pieces[capSq];
-  delete pieces[m.from];pieces[m.to]=e;
+  delete pieces[m.from];if(e)pieces[m.to]=e;
   const dur=e?glisse(e,m.from,m.to):0;
   if(m.flags.includes("k")||m.flags.includes("q")){const rk=m.color==="w"?"1":"8",[rf,rt]=m.flags.includes("k")?["h","f"]:["a","d"];const re=pieces[rf+rk];delete pieces[rf+rk];pieces[rt+rk]=re;if(re)setTimeout(()=>glisse(re,rf+rk,rt+rk),120);}
   if(cap){ // la pièce prise éclate quand l'attaquant arrive

@@ -46,9 +46,13 @@
       <h3>Le tournoi</h3>
       <p class="note">Choisis ton adversaire. Le Page est le plus facile, le Duc le plus redoutable.</p>
       <div class="chips wrap" id="tNiveaux" role="group" aria-label="Adversaire"></div>
+      <div class="duel" id="tDuel"></div>
       <p class="note">Avec quelles pièces veux-tu jouer ?</p>
       <div class="chips wrap" id="tCamps" role="group" aria-label="Couleur"></div>
       <button id="tGo" class="or" type="button">En garde !</button>
+      <h3 class="sep">Finales à gagner</h3>
+      <p class="note">Tu as l'avantage, le Gardien défend de toutes ses forces. Fais mat pour gagner !</p>
+      <div class="chips wrap" id="tFinales" role="group" aria-label="Finales"></div>
     </div>
     <div id="tJeu" class="tjeu jeu" hidden>
       <div class="mission">
@@ -60,6 +64,7 @@
       <div class="parchemin" id="tParch"><p>…</p></div>
       <div class="actions">
         <button id="tNouvelle" class="or" type="button">Nouvelle</button>
+        <button id="tAnnuler" type="button" hidden>Annuler (3)</button>
         <button id="tAbandon" type="button">Abandonner</button>
         <button id="tConseil" type="button" hidden>Conseil</button>
       </div>
@@ -92,7 +97,7 @@
       <input id="nom" maxlength="24" placeholder="Ton prénom" autocomplete="off">
     </div>
     <div class="carte"><h3>Exploits</h3>
-      <div class="stats"><div><b id="sReussi">0</b><span>épreuves réussies</span></div><div><b id="sSerie">0</b><span>meilleure série</span></div><div><b id="sCote">600</b><span>cote d'armes</span></div></div>
+      <div class="stats"><div><b id="sReussi">0</b><span>épreuves réussies</span></div><div><b id="sSerie">0</b><span>meilleure série</span></div><div><b id="sCote">600</b><span>cote d'armes</span></div><div><b id="sEtoiles">0</b><span>étoiles</span></div><div><b id="sJoute">0</b><span>record de joute</span></div><div><b id="sRoyaume">0/10</b><span>lieux conquis</span></div></div>
     </div>
     <div class="carte"><h3>Maîtrise des bottes</h3><div id="themes"></div></div>
     <div class="carte"><h3>Tournoi</h3><div id="tBilan"></div></div>
@@ -130,6 +135,7 @@
 <script src="js/conseil.js"></script>
 <script src="js/connecte.js"></script>
 <script src="js/recompenses.js"></script>
+<script src="js/quetes.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

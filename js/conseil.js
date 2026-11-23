@@ -19,9 +19,9 @@ async function conseilOuvrir(n){
   S.conseils=(S.conseils||0)+1;save();hautsVerifier();
   $("tChoix").hidden=true;$("tJeu").hidden=true;$("cJeu").hidden=false;$("cSlot").appendChild($("plateau"));
   ["cPrec","cSuiv","cMontrer"].forEach(id=>$(id).disabled=true);$("cExplique").hidden=true;
-  $("cTexte").textContent=`Ta partie contre ${(NIVEAUX.find(x=>x.k===p.niv)||NIVEAUX[0]).nom}`;$("cNum").textContent="…";
+  $("cTexte").textContent=`Ta partie contre ${nivDe(p.niv).chev}`;$("cNum").textContent="…";
   // position finale pendant l'analyse
-  const g=new Chess();for(const c of p.coups)g.move(c);G=g;flip=p.camp==="b";draw();clearArrows();
+  const g=p.fen?new Chess(p.fen):new Chess();for(const c of p.coups)g.move(c);G=g;flip=p.camp==="b";draw();clearArrows();
   const cles=C.cache[p.d]||await cAnalyser(p,jeton);
   if(!cles||jeton!==C.jeton)return;
   C.cache[p.d]=cles;C.cles=cles;
@@ -30,7 +30,7 @@ async function conseilOuvrir(n){
 }
 async function cAnalyser(p,jeton){
   MOTEUR.demarrer();
-  const g=new Chess(),pos=[g.fen()],coups=[];
+  const g=p.fen?new Chess(p.fen):new Chess(),pos=[g.fen()],coups=[];
   for(const c of p.coups){coups.push(g.move(c));pos.push(g.fen());}
   const E=new Array(pos.length).fill(null);
   const besoin=new Set();

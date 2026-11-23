@@ -23,6 +23,11 @@ const HAUTS=[
   {k:"baron",nom:"Vainqueur du Baron",desc:"Battre le Baron au tournoi.",test:()=>vic("baron")>0},
   {k:"duc",nom:"Vainqueur du Duc",desc:"Battre le Duc au tournoi.",test:()=>vic("duc")>0,prix:"plateau:royal"},
   {k:"conseil",nom:"Sage écuyer",desc:"Écouter le conseil de guerre.",test:()=>S.conseils>=1},
+  {k:"coffre",nom:"Chasseur de trésor",desc:"Ouvrir le coffre d'une quête du jour.",test:()=>S.coffres>=1},
+  {k:"etoiles50",nom:"Ciel étoilé",desc:"Gagner 50 étoiles.",test:()=>totalEtoiles()>=50},
+  {k:"joute10",nom:"Champion de joute",desc:"Réussir 10 épreuves dans une joute de 3 minutes.",test:()=>S.joute.best>=10},
+  {k:"royaume",nom:"Seigneur du royaume",desc:"Conquérir tous les lieux de la carte.",test:()=>LIEUX.every(lieuConquis)},
+  {k:"finales",nom:"Maître des finales",desc:"Gagner les 4 finales du tournoi.",test:()=>FINALES.every(f=>S.finales[f.k])},
 ];
 function prixNom(p){const[t,k]=p.split(":");return t==="pieces"?`Pièces ${JEUX_PIECES[k]}`:`Échiquier ${PLATEAUX[k].nom}`;}
 function debloque(prix){ // un prix est-il obtenu ? (ceux qu'aucun haut fait ne donne sont libres)
@@ -67,8 +72,8 @@ $("vBlason").addEventListener("click",e=>{
 appliquerPlateau();
 
 /* ---------- Fêtes : sceau de cire, XP qui vole, adoubement ---------- */
-function sceau(txt,rate,ms=1400){
-  const s=$("sceau");$("sceauTxt").textContent=txt;s.className="sceau";void s.offsetWidth;
+function sceau(txt,rate,ms=1400,etoiles=0){
+  const s=$("sceau");$("sceauTxt").innerHTML=esc(txt)+(etoiles?`<small>${"★".repeat(etoiles)}<i>${"★".repeat(3-etoiles)}</i></small>`:"");s.className="sceau";void s.offsetWidth;
   s.className="sceau on"+(rate?" rate":"");clearTimeout(s._t);s._t=setTimeout(()=>s.className="sceau",ms);
 }
 function xpVole(n){

@@ -5,13 +5,28 @@
    skill : option « Skill Level » de Stockfish (0 à 20) ; depth/ms : profondeur ou temps de recherche ;
    hasard : part de coups joués au hasard, pour que les premiers niveaux restent battables.
    Réglages de départ, à ajuster après les essais avec le joueur. */
+/* Chaque niveau est un chevalier nommé (lot 9) : blason (fond, motif), phrase d'accueil, de victoire et de défaite. */
 const NIVEAUX=[
-  {k:"page",nom:"Le Page",skill:0,depth:1,hasard:.35,xp:20},
-  {k:"ecuyer",nom:"L'Écuyer",skill:1,depth:2,hasard:.2,xp:30},
-  {k:"chevalier",nom:"Le Chevalier",skill:4,depth:5,hasard:.08,xp:40},
-  {k:"baron",nom:"Le Baron",skill:9,depth:9,hasard:0,xp:60},
-  {k:"duc",nom:"Le Duc",skill:16,ms:1000,hasard:0,xp:100},
+  {k:"page",nom:"Le Page",skill:0,depth:1,hasard:.35,xp:20,chev:"Messire Tristan",bl:["#2f8f5b","#f3dc94"],
+    salut:"Je suis Tristan, page du château. Je débute, comme toi… ou presque !",gagne:"Ha ! Même un page peut gagner. Revanche ?",perd:"Bien joué ! Tu as battu Tristan. L'Écuyer t'attend."},
+  {k:"ecuyer",nom:"L'Écuyer",skill:1,depth:2,hasard:.2,xp:30,chev:"Dame Iseult",bl:["#24427f","#e3b84b"],
+    salut:"Je suis Iseult, écuyère de la reine. Mes pièces sont bien entraînées.",gagne:"La reine sera fière de moi ! Reviens quand tu veux.",perd:"Quel duel ! Tu mérites de croiser le fer avec le Chevalier."},
+  {k:"chevalier",nom:"Le Chevalier",skill:4,depth:5,hasard:.08,xp:40,chev:"Sire Perceval",bl:["#b8343e","#f3dc94"],
+    salut:"Je suis Perceval, chevalier de la Table ronde. En garde !",gagne:"Ma lame a été plus rapide aujourd'hui.",perd:"Je m'incline. Tu as l'âme d'un vrai chevalier !"},
+  {k:"baron",nom:"Le Baron",skill:9,depth:9,hasard:0,xp:60,chev:"Le Baron Noir",bl:["#1e1b2b","#b8343e"],
+    salut:"On m'appelle le Baron Noir. Je ne fais jamais de cadeau.",gagne:"Hé hé… Le Baron Noir ne perd pas si facilement.",perd:"Impossible ! Personne ne bat le Baron Noir… sauf toi."},
+  {k:"duc",nom:"Le Duc",skill:16,ms:1000,hasard:0,xp:100,chev:"Le Duc d'Or",bl:["#a8772e","#fff4c4"],
+    salut:"Je suis le Duc d'Or, maître de ce tournoi. Prouve ta valeur !",gagne:"Le trône reste à moi. Entraîne-toi encore, jeune chevalier.",perd:"Tu as battu le Duc d'Or ! Tout le royaume chante ton nom !"},
 ];
+// Finales à gagner (FINALES dans puzzles.js) : Stockfish défend à pleine force.
+const GARDIEN={k:"finale",nom:"Le Gardien",skill:20,ms:400,hasard:0,xp:25,chev:"Le Gardien des finales",bl:["#4d566e","#dfe6f5"]};
+function nivDe(k){
+  if(typeof k==="string"&&k.startsWith("finale:")){const f=FINALES.find(x=>x.k===k.slice(7));if(f)return Object.assign({},GARDIEN,{k,finale:f});}
+  return NIVEAUX.find(n=>n.k===k)||NIVEAUX[0];
+}
+function portrait(n){const[f,m]=n.bl;
+  return `<svg class="portrait" viewBox="0 0 40 48" aria-hidden="true"><path d="M3 3h34v18c0 13-9 21-17 24C12 42 3 34 3 21z" fill="${f}" stroke="#e3b84b" stroke-width="2"/>
+    <path d="M12 30v-9c0-6 3.5-10 8-10s8 4 8 10v9z" fill="${m}"/><path d="M14 21h12M20 14v16" stroke="${f}" stroke-width="2.2"/><path d="M12 30h16" stroke="${m}" stroke-width="3"/></svg>`;}
 const NOM_PIECE={p:"ton pion",n:"ton cavalier",b:"ton fou",r:"ta tour",q:"ta dame"};
 
 /* ---------- Moteur ---------- */
@@ -45,7 +60,9 @@ const MOTEUR={
 
 /* ---------- État de la partie ----------
    S.tournoi.partie = {niv, camp, coups:[SAN]} : la partie en cours est gardée sur l'appareil. */
-const T={g:null,niv:null,camp:"w",etat:"choix",jeton:0,dernierScore:null};
+const T={g:null,niv:null,camp:"w",etat:"choix",jeton:0,dernierScore:null,fen:null,jokers:3};
+const JOKERS=3; // coups annulables par partie, aux niveaux Page et Écuyer seulement
+function tPeutAnnuler(){return T.g&&!T.niv.finale&&["page","ecuyer"].includes(T.niv.k)&&T.etat!=="fini";}
 function tPlus(fn,ms){const n=T.jeton;setTimeout(()=>{if(n===T.jeton)fn();},ms);}
 function tMsg(h){$("tParch").innerHTML=`<p>${h}</p>`;}
 function tPeutJouer(){return T.etat==="joueur"&&T.g&&T.g.turn()===T.camp;}
@@ -56,28 +73,31 @@ function tAfficher(){ // met l'échiquier du tournoi à l'écran
 }
 function tEntete(){
   const n=T.niv;
-  $("tTitre").textContent=n?`${n.nom} t'attend`:"Le tournoi";
-  $("tNiv").textContent=n?n.nom.replace(/^(Le |L')/,""):"—";
+  $("tTitre").textContent=n?(n.finale?n.finale.nom:`${n.chev} t'attend`):"Le tournoi";
+  $("tNiv").textContent=n?(n.finale?"Finale":n.nom.replace(/^(Le |L')/,"")):"—";
+  const a=$("tAnnuler");a.hidden=!tPeutAnnuler();a.textContent=`Annuler (${T.jokers})`;
+  a.disabled=!T.jokers||!tPeutJouer()||T.g.history().length<2;
   $("tTrait").className="trait "+(T.g&&T.g.turn()==="b"?"b":"w");
-  $("tTexte").textContent=!T.g?"Choisis ton adversaire.":T.etat==="fini"?"La partie est finie.":tPeutJouer()?"À toi de jouer.":`${n.nom} réfléchit…`;
+  $("tTexte").textContent=!T.g?"Choisis ton adversaire.":T.etat==="fini"?"La partie est finie.":tPeutJouer()?"À toi de jouer.":`${n.chev} réfléchit…`;
 }
-function tSauver(){S.tournoi.partie=T.g&&T.etat!=="fini"?{niv:T.niv.k,camp:T.camp,coups:T.g.history()}:null;save();}
+function tSauver(){S.tournoi.partie=T.g&&T.etat!=="fini"?{niv:T.niv.k,camp:T.camp,coups:T.g.history(),fen:T.fen,jokers:T.jokers}:null;save();}
 
 function tCommencer(k,camp){
   T.jeton++;MOTEUR.stop();
-  T.niv=NIVEAUX.find(n=>n.k===k)||NIVEAUX[0];
-  T.camp=camp==="hasard"?(Math.random()<.5?"w":"b"):camp;
-  T.g=new Chess();T.dernierScore=null;T.etat="joueur";
+  T.niv=nivDe(k);T.fen=T.niv.finale?T.niv.finale.fen:null;T.jokers=JOKERS;
+  T.camp=T.niv.finale?"w":camp==="hasard"?(Math.random()<.5?"w":"b"):camp;
+  T.g=T.fen?new Chess(T.fen):new Chess();T.dernierScore=null;T.etat="joueur";
   $("tChoix").hidden=true;$("tJeu").hidden=false;
   tAfficher();tSauver();
-  tMsg(`${T.niv.nom} te salue. ${T.camp==="w"?"Tu as les blancs : à toi de commencer !":"Tu as les noirs : il commence."}`);
+  if(T.niv.finale)tMsg(`<b>${T.niv.finale.nom}</b>. ${T.niv.finale.x} Le Gardien défend de toutes ses forces : fais mat pour gagner !`);
+  else tMsg(`<b>${T.niv.chev}</b> : « ${T.niv.salut} » ${T.camp==="w"?"Tu as les blancs : à toi de commencer !":"Tu as les noirs : il commence."}`);
   if(T.g.turn()!==T.camp)tAdversaire();
   tEntete();
 }
 function tReprendre(){ // au démarrage : reprendre la partie gardée sur l'appareil
   const p=S.tournoi.partie;if(!p)return false;
-  const g=new Chess();for(const c of p.coups)if(!g.move(c))return false;
-  T.niv=NIVEAUX.find(n=>n.k===p.niv)||NIVEAUX[0];T.camp=p.camp;T.g=g;
+  const g=p.fen?new Chess(p.fen):new Chess();for(const c of p.coups)if(!g.move(c))return false;
+  T.niv=nivDe(p.niv);T.camp=p.camp;T.g=g;T.fen=p.fen||null;T.jokers=typeof p.jokers==="number"?p.jokers:JOKERS;
   T.etat=g.turn()===T.camp?"joueur":"pense"; // « pense » : l'adversaire jouera à l'ouverture de l'onglet
   $("tChoix").hidden=true;$("tJeu").hidden=false;return true;
 }
@@ -101,7 +121,7 @@ function tAdversaire(){
     tPlus(()=>{
       const m=T.g.move(coup);if(!m)return;
       animMove(m);tSauver();
-      tMsg(`<b>${T.niv.nom}</b> joue <b>${m.san}</b>. « ${tCommentaire(m,auHasard?null:score)} »`);
+      tMsg(`<b>${T.niv.chev}</b> joue <b>${m.san}</b>. « ${tCommentaire(m,auHasard?null:score)} »`);
       if(tFin())return;
       T.etat="joueur";tEntete();
     },Math.max(0,650-(Date.now()-t0)));
@@ -130,13 +150,14 @@ function tCommentaire(m,score){
 function tFin(){
   const g=T.g;if(!g.game_over())return false;
   T.etat="fini";T.jeton++;
+  if(T.niv.finale)return tFinFinale(g);
   const b=S.tournoi.bilan[T.niv.k]||{v:0,n:0,d:0};
   let gain=0,txt;
   if(g.in_checkmate()){
     const gagne=g.turn()!==T.camp;
-    if(gagne){b.v++;gain=T.niv.xp;txt=`<span class="ok">Victoire ! Tu as battu ${T.niv.nom}. +${gain} XP</span>`;
+    if(gagne){b.v++;gain=T.niv.xp;txt=`<span class="ok">Victoire ! +${gain} XP</span><br><b>${T.niv.chev}</b> : « ${T.niv.perd} »`;
       tPlus(()=>{SON.victoire();confettis();sceau("Victoire !",false,1800);},900);}
-    else{b.d++;txt=`<span class="ko">${T.niv.nom} a gagné cette fois.</span> Chaque défaite t'apprend quelque chose. Retente ta chance !`;}
+    else{b.d++;txt=`<b>${T.niv.chev}</b> : « ${T.niv.gagne} »<br>Chaque défaite t'apprend quelque chose. Le conseil de guerre peut t'aider !`;}
   }else{
     b.n++;gain=Math.round(T.niv.xp/2);
     const pourquoi=g.in_stalemate()?"pat : le roi ne peut plus bouger sans être en échec":g.in_threefold_repetition()?"la même position est revenue trois fois":g.insufficient_material()?"il ne reste pas assez de pièces pour faire mat":"règle des 50 coups";
@@ -147,19 +168,41 @@ function tFin(){
   return true;
 }
 // Partie terminée : gardée dans le blason (les 20 dernières) pour le conseil de guerre.
+function tFinFinale(g){
+  const f=T.niv.finale,gagne=g.in_checkmate()&&g.turn()!==T.camp,deja=!!S.finales[f.k];
+  let txt;
+  if(gagne){const gain=deja?5:T.niv.xp;S.finales[f.k]=true;gagnerXP(gain);
+    txt=`<span class="ok">Mat ! Tu as gagné la finale « ${f.nom} ». +${gain} XP</span>`;
+    tPlus(()=>{SON.victoire();confettis();sceau("Finale gagnée !",false,1800);},900);}
+  else txt=`<span class="ko">Partie nulle : la finale n'est pas gagnée.</span> ${g.in_stalemate()?"Pat ! Laisse toujours une case au roi adverse avant le mat.":"Il faut faire mat avant 50 coups sans prise ni coup de pion."} Réessaie !`;
+  tArchiver(gagne?"victoire":"nulle");tSauver();majEntete();hautsVerifier();tChoixMaj();
+  tMsg(txt);tEntete();$("tAbandon").disabled=true;
+  return true;
+}
 function tArchiver(res){
   if(T.g.history().length<2)return;
-  S.parties.unshift({d:Date.now(),niv:T.niv.k,camp:T.camp,coups:T.g.history(),res});S.parties=S.parties.slice(0,20);
+  S.parties.unshift({d:Date.now(),niv:T.niv.k,camp:T.camp,coups:T.g.history(),res,fen:T.fen||undefined});S.parties=S.parties.slice(0,20);
   $("tConseil").hidden=false;
 }
 function tAbandonner(){
   if(!T.g||T.etat==="fini")return;
   T.jeton++;MOTEUR.stop();T.etat="fini";
-  const b=S.tournoi.bilan[T.niv.k]||{v:0,n:0,d:0};b.d++;S.tournoi.bilan[T.niv.k]=b;tArchiver("abandon");tSauver();
+  if(!T.niv.finale){const b=S.tournoi.bilan[T.niv.k]||{v:0,n:0,d:0};b.d++;S.tournoi.bilan[T.niv.k]=b;}
+  tArchiver("abandon");tSauver();
   tMsg(`Tu as abandonné. Ce n'est que partie remise !`);tEntete();$("tAbandon").disabled=true;
 }
 function tChoisir(){ // retour à l'écran de choix
-  $("tChoix").hidden=false;$("tJeu").hidden=true;
+  $("tChoix").hidden=false;$("tJeu").hidden=true;tChoixMaj();
+}
+function tAnnuler(){ // joker : on reprend son dernier coup et la réponse de l'adversaire
+  if(!tPeutAnnuler()||!tPeutJouer()||!T.jokers||T.g.history().length<2)return;
+  T.g.undo();T.g.undo();T.jokers--;T.dernierScore=null;
+  tAfficher();tSauver();tEntete();
+  tMsg(`Coup annulé. Il te reste ${T.jokers} joker${T.jokers>1?"s":""} pour cette partie. Réfléchis bien !`);
+}
+function tDuel(k){const n=nivDe(k);$("tDuel").innerHTML=`${portrait(n)}<div><b>${n.chev}</b><span>${n.nom}</span><p>« ${n.salut} »</p></div>`;}
+function tChoixMaj(){
+  $("tFinales").innerHTML=FINALES.map(f=>`<button type="button" class="chip${S.finales[f.k]?" gagne":""}" data-f="${f.k}">${S.finales[f.k]?"✓ ":""}${f.nom}</button>`).join("");
 }
 
 /* ---------- Écran de choix ---------- */
@@ -169,6 +212,9 @@ function tChoisir(){ // retour à l'écran de choix
   cp.innerHTML=[["w","Les blancs"],["b","Les noirs"],["hasard","Au hasard"]].map(([k,v],i)=>`<button type="button" class="chip${i===0?" on":""}" data-k="${k}">${v}</button>`).join("");
   const radio=el=>el.onclick=e=>{const b=e.target.closest(".chip");if(!b)return;el.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c===b));};
   radio(nv);radio(cp);
+  nv.addEventListener("click",()=>tDuel(nv.querySelector(".on").dataset.k));tDuel("page");tChoixMaj();
+  $("tFinales").onclick=e=>{const b=e.target.closest(".chip");if(!b)return;ac();MOTEUR.demarrer();$("tConseil").hidden=true;tCommencer("finale:"+b.dataset.f,"w");$("tAbandon").disabled=false;};
+  $("tAnnuler").onclick=tAnnuler;
   $("tGo").onclick=()=>{ac();MOTEUR.demarrer();$("tConseil").hidden=true;tCommencer(nv.querySelector(".on").dataset.k,cp.querySelector(".on").dataset.k);$("tAbandon").disabled=false;};
   $("tNouvelle").onclick=()=>{T.jeton++;MOTEUR.stop();if(T.etat!=="fini"){T.etat="fini";S.tournoi.partie=null;save();}tChoisir();};
   $("tAbandon").onclick=tAbandonner;

@@ -27,7 +27,8 @@ const BUT={mat1:"Donne échec et mat en un coup.",mat2:"Échec et mat en deux co
 function tauxTheme(t){const s=S.th[t]||{ok:0,n:0};return (s.ok+1)/(s.n+2);}
 function tirage(poids){let tot=0;for(const[,w]of poids)tot+=w;let x=Math.random()*tot;for(const[k,w]of poids){x-=w;if(x<=0)return k;}return poids[poids.length-1][0];}
 function choisir(){
-  const filtre=$("chips").dataset.f||"tous";
+  let filtre=$("chips").dataset.f||"tous";
+  if(filtre==="quete"){const q=queteSuivante();if(q)return q;filtre="tous";}
   const recents=new Set(S.vus.slice(-12));
   const ok=p=>(filtre==="tous"||p.t===filtre)&&p.id!==(PZ&&PZ.id);
   const revoir=S.aRevoir.map(id=>P.find(p=>p.id===id)).filter(p=>p&&ok(p)&&!recents.has(p.id));
@@ -57,10 +58,10 @@ function charger(p){
   $("trait").className="trait "+(blanc?"w":"b");
   $("mTitre").textContent=(blanc?"Les blancs":"Les noirs")+" jouent";$("mTexte").textContent=BUT[p.t]||"";$("mTheme").textContent=THEMES[p.t];
   $("sceau").className="sceau";$("bExplique").hidden=true;
-  $("bIndice").disabled=!!p.a;$("bSolution").disabled=!!p.a;
+  $("bIndice").disabled=!!p.a||J.actif;$("bSolution").disabled=!!p.a||J.actif;$("bIndice").textContent="Indice";
   if(p.a){
     $("parch").innerHTML=`<p>Tu joues les <b>${blanc?"blancs":"noirs"}</b>. Regarde bien le coup de l'adversaire…</p>`;
-    plus(()=>{const m=G.move(PZ.line[0]);animMove(m);step_=1;etat="jeu";$("bIndice").disabled=false;$("bSolution").disabled=false;
+    plus(()=>{const m=G.move(PZ.line[0]);animMove(m);step_=1;etat="jeu";$("bIndice").disabled=J.actif;$("bSolution").disabled=J.actif;
       $("parch").innerHTML=`<p>L'adversaire a joué <b>${m.san}</b>. À toi ! Touche une pièce, puis la case où tu veux la jouer.</p>`;},700);
   } else $("parch").innerHTML=`<p>Tu joues les <b>${blanc?"blancs":"noirs"}</b>. Touche une pièce, puis la case où tu veux la jouer.</p>`;
 }
@@ -93,16 +94,18 @@ function jouer(vm){
 }
 function nomOuEcuyer(){return S.nom.trim()||"jeune écuyer";}
 function reussite(){
-  etat="fini";const gain=indice?5:10;
+  etat="fini";const et=etoilesDe(indice),gain={3:10,2:7,1:5}[et];noterEtoiles(PZ.id,et);
   setTimeout(()=>{
     SON.victoire();burstAt($("board"),50,["#e3b84b","#f3dc94","#2f8f5b","#ffffff","#b8343e"]);
     if(G.in_checkmate())confettis();
-    sceau(["Bravo !","Touché !","Superbe !","Victoire !"][Math.floor(Math.random()*4)]);
+    sceau(["Bravo !","Touché !","Superbe !","Victoire !"][Math.floor(Math.random()*4)],false,1400,et);
   },420);
   bilan(true,gain);
-  $("parch").innerHTML=`<p><span class="ok">Bien joué, ${esc(nomOuEcuyer())} ! +${gain} XP</span><br>${PZ.x}</p>`;
+  $("parch").innerHTML=`<p>${etoilesHTML(et)} <span class="ok">Bien joué, ${esc(nomOuEcuyer())} ! +${gain} XP</span><br>${PZ.x}</p>`;
   $("bIndice").disabled=true;$("bSolution").disabled=true;
+  finEpreuve(true);
 }
+function finEpreuve(ok){if(J.actif){jouteApres(ok);return;}queteApres();conquetesVerifier();}
 function echec(m){
   etat="fini";SON.rate();
   setTimeout(()=>{B.classList.add("shake");setTimeout(()=>B.classList.remove("shake"),420);
@@ -112,6 +115,7 @@ function echec(m){
   $("parch").innerHTML=`<p><span class="ko">Ce coup (${m.san}) ne marche pas.</span> Regarde la flèche verte : c'est le bon coup.<br>${PZ.x}</p>`;
   $("bIndice").disabled=true;$("bSolution").disabled=true;
   iaBouton("bExplique","parch",()=>iaQuestionEpreuve(m.san));
+  finEpreuve(false);
 }
 function montrerSolution(rejouer){
   const g=new Chess(G.fen());const mv=g.move(PZ.line[step_]);if(!mv)return;
@@ -141,14 +145,14 @@ function majBlason(){
   iaMajReglages();majApparence();
   const[g,n]=gradeDe(S.xp);
   $("gGrade").textContent=g[1];$("gProchain").textContent=n?`Encore ${n[0]-S.xp} XP pour devenir ${n[1]}`:"Grade le plus haut atteint !";
-  $("nom").value=S.nom;$("sReussi").textContent=S.reussi;$("sSerie").textContent=S.best;$("sCote").textContent=S.cote;
+  $("nom").value=S.nom;$("sReussi").textContent=S.reussi;$("sSerie").textContent=S.best;$("sCote").textContent=S.cote;$("sEtoiles").textContent=totalEtoiles();$("sJoute").textContent=S.joute.best;$("sRoyaume").textContent=`${LIEUX.filter(lieuConquis).length}/${LIEUX.length}`;
   $("themes").innerHTML=Object.keys(THEMES).map(k=>{const t=S.th[k]||{ok:0,n:0};const pc=t.n?Math.round(t.ok/t.n*100):0;
     return `<div class="th"><span>${THEMES[k]}</span><em>${t.ok}/${t.n}</em><div class="bar"><i style="width:${pc}%"></i></div></div>`;}).join("");
   $("tBilan").innerHTML=NIVEAUX.map(n=>{const b=S.tournoi.bilan[n.k]||{v:0,n:0,d:0};
     return `<div class="th"><span>${n.nom}</span><em>${b.v} victoire${b.v>1?"s":""} · ${b.n} nulle${b.n>1?"s":""} · ${b.d} défaite${b.d>1?"s":""}</em></div>`;}).join("");
   const RES={victoire:["Victoire","#9be3b8"],defaite:["Défaite","#ffb3b8"],nulle:["Nulle","#f3dc94"],abandon:["Abandon","#ffb3b8"]};
-  $("parties").innerHTML=S.parties.length?S.parties.map((p,i)=>{const n=NIVEAUX.find(x=>x.k===p.niv)||NIVEAUX[0];const r=RES[p.res]||["?","#fff"];
-    return `<div><span>${new Date(p.d).toLocaleDateString("fr-FR",{day:"numeric",month:"short"})} · ${n.nom} · <b style="color:${r[1]}">${r[0]}</b></span><button type="button" class="petit" data-p="${i}">Conseil</button></div>`;}).join(""):'<p class="note">Aucune partie pour l\'instant. Va au tournoi !</p>';
+  $("parties").innerHTML=S.parties.length?S.parties.map((p,i)=>{const n=nivDe(p.niv);const r=RES[p.res]||["?","#fff"];
+    return `<div><span>${new Date(p.d).toLocaleDateString("fr-FR",{day:"numeric",month:"short"})} · ${n.finale?n.finale.nom:n.chev} · <b style="color:${r[1]}">${r[0]}</b></span><button type="button" class="petit" data-p="${i}">Conseil</button></div>`;}).join(""):'<p class="note">Aucune partie pour l\'instant. Va au tournoi !</p>';
   $("hist").innerHTML=S.hist.length?S.hist.map(h=>`<div><span>${THEMES[h.t]}</span><span style="color:${h.ok?"#9be3b8":"#ffb3b8"}">${h.ok?"Réussi":"Raté"}</span></div>`).join(""):'<p class="note">Aucune épreuve pour l\'instant. Va à la salle d\'armes !</p>';
 }
 function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
@@ -157,10 +161,13 @@ function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;
 B.addEventListener("click",e=>{const r=B.getBoundingClientRect();let f=Math.floor((e.clientX-r.left)/r.width*8),rr=Math.floor((e.clientY-r.top)/r.height*8);
   if(f<0||f>7||rr<0||rr>7)return;if(flip){f=7-f;rr=7-rr;}ac();tap(files[f]+(8-rr));});
 $("bSuivant").onclick=()=>{ac();charger(choisir());};
-$("bIndice").onclick=()=>{if(etat!=="jeu")return;indice++;const g=new Chess(G.fen());const mv=g.move(PZ.line[step_]);
-  if(indice===1){clearMarks();sqEl(mv.from).classList.add("hint");$("parch").innerHTML=`<p>Indice : la pièce qui brille est celle à jouer.</p>`;}
-  else{clearArrows();arrow(mv.from,mv.to);$("parch").innerHTML=`<p>Dernier indice : suis la flèche !</p>`;$("bIndice").disabled=true;}};
-$("bSolution").onclick=()=>{if(etat!=="jeu")return;indice=2;bilan(false,0);$("parch").innerHTML=`<p><span class="ko">Voici la solution.</span><br>${PZ.x}</p>`;montrerSolution(true);$("bIndice").disabled=true;$("bSolution").disabled=true;iaBouton("bExplique","parch",()=>iaQuestionEpreuve(null));};
+/* Indice gradué : 1) la pièce à jouer, 2) la case d'arrivée, 3) la solution. Chaque indice coûte une étoile. */
+$("bIndice").onclick=()=>{if(etat!=="jeu")return;const g=new Chess(G.fen());const mv=g.move(PZ.line[step_]);if(!mv)return;
+  if(indice>=2){$("bSolution").onclick();return;}
+  indice++;clearMarks();sel=null;sqEl(mv.from).classList.add("hint");
+  if(indice===1){$("parch").innerHTML=`<p>Indice 1 : la pièce qui brille est celle à jouer. ${etoilesHTML(2)}</p>`;$("bIndice").textContent="Indice 2";}
+  else{sqEl(mv.to).classList.add("hint");$("parch").innerHTML=`<p>Indice 2 : elle va sur l'autre case qui brille. ${etoilesHTML(1)}</p>`;$("bIndice").textContent="Solution";}};
+$("bSolution").onclick=()=>{if(etat!=="jeu")return;indice=3;bilan(false,0);$("parch").innerHTML=`<p><span class="ko">Voici la solution.</span><br>${PZ.x}</p>`;montrerSolution(true);$("bIndice").disabled=true;$("bSolution").disabled=true;iaBouton("bExplique","parch",()=>iaQuestionEpreuve(null));finEpreuve(false);};
 $("bSon").onclick=()=>{S.son=!S.son;save();$("bSon").textContent="Son : "+(S.son?"oui":"non");$("bSon").setAttribute("aria-pressed",S.son);};
 $("bSon").textContent="Son : "+(S.son?"oui":"non");
 $("nom").addEventListener("input",e=>{S.nom=e.target.value;save();majEntete();});
@@ -168,7 +175,7 @@ $("nom").addEventListener("input",e=>{S.nom=e.target.value;save();majEntete();})
 let mode="salle";
 function onglet(v){
   if(v===mode&&v!=="blason"){scrollTo(0,0);return;}
-  if(mode==="salle"){partie++;} // les minuteries d'épreuve en cours s'annulent
+  if(mode==="salle"){partie++;if(J.actif){jouteArreter();$("mTheme").textContent=THEMES[PZ.t];}} // les minuteries d'épreuve en cours s'annulent
   if(mode==="tournoi"){if(!$("cJeu").hidden)cQuitter();T.jeton++;MOTEUR.stop();} // la réflexion de l'adversaire reprendra au retour
   mode=v;
   for(const[k,id,t]of[["salle","vSalle","tSalle"],["tournoi","vTournoi","tTournoiB"],["blason","vBlason","tBlason"]]){
@@ -188,8 +195,19 @@ function onglet(v){
 $("parties").onclick=e=>{const b=e.target.closest("button[data-p]");if(b)conseilOuvrir(+b.dataset.p);};
 $("tSalle").onclick=()=>onglet("salle");$("tTournoiB").onclick=()=>onglet("tournoi");$("tBlason").onclick=()=>onglet("blason");
 const ch=$("chips");ch.dataset.f="tous";
-ch.innerHTML=[["tous","Toutes les bottes"],...Object.entries(THEMES)].map(([k,v])=>`<button type="button" class="chip${k==="tous"?" on":""}" data-k="${k}">${v}</button>`).join("");
-ch.onclick=e=>{const b=e.target.closest(".chip");if(!b)return;ch.dataset.f=b.dataset.k;ch.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c===b));charger(choisir());};
+ch.innerHTML=`<button type="button" class="chip special" data-k="quete">Quête du jour</button><button type="button" class="chip special" data-k="carte">Carte du royaume</button><button type="button" class="chip special" data-k="joute">Joute 3 min</button>`+
+  [["tous","Toutes les bottes"],...Object.entries(THEMES)].map(([k,v])=>`<button type="button" class="chip${k==="tous"?" on":""}" data-k="${k}">${v}</button>`).join("");
+function choisirFiltre(k){
+  if(J.actif)jouteArreter();
+  ch.dataset.f=k;ch.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c.dataset.k===k));
+  const b=ch.querySelector(`.chip[data-k="${k}"]`);b&&b.scrollIntoView({block:"nearest",inline:"center",behavior:"smooth"});
+  charger(choisir());
+}
+ch.onclick=e=>{const b=e.target.closest(".chip");if(!b)return;const k=b.dataset.k;ac();
+  if(k==="carte"){ouvrirCarte();return;}
+  if(k==="joute"){ch.dataset.f="tous";ch.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c===b));jouteDemarrer();return;}
+  choisirFiltre(k);};
+majQueteChip();
 /* Vrai plein écran (barre de Chrome masquée) au premier toucher de chaque visite, sauf si l'appli installée l'est déjà. */
 let pleinTente=false;
 function pleinEcran(){

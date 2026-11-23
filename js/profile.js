@@ -8,12 +8,16 @@ const GRADES=[[0,"Page"],[50,"Écuyer"],[150,"Chevalier"],[300,"Chevalier banner
 // Ajout du lot 4 : parties (les 20 dernières parties du tournoi, pour le conseil de guerre).
 // Ajout du lot 6 : pieces (jeu de pièces), plateau (couleurs), hauts (hauts faits débloqués), conseils (nombre de conseils ouverts).
 // Ajout du lot 8 : pleinEcran (passer en plein écran au premier toucher).
+// Ajouts du lot 9 : etoiles (meilleur nombre d'étoiles par épreuve), quete (quête du jour), coffres, conquis (lieux de la carte),
+// joute (record du contre-la-montre), finales (finales gagnées).
 // Les anciennes données sont gardées telles quelles ; les champs absents prennent leur valeur par défaut.
-function defauts(){return {nom:"",xp:0,cote:600,serie:0,best:0,reussi:0,th:{},hist:[],vus:[],son:true,aRevoir:[],reussis:[],tournoi:{partie:null,bilan:{}},parties:[],pieces:"fantasy",plateau:"nuit",hauts:[],conseils:0,pleinEcran:true};}
+function defauts(){return {nom:"",xp:0,cote:600,serie:0,best:0,reussi:0,th:{},hist:[],vus:[],son:true,aRevoir:[],reussis:[],tournoi:{partie:null,bilan:{}},parties:[],pieces:"fantasy",plateau:"nuit",hauts:[],conseils:0,pleinEcran:true,etoiles:{},quete:null,coffres:0,conquis:[],joute:{best:0,n:0},finales:{}};}
 function migrer(o){
   const d=defauts(),s=Object.assign(d,o&&typeof o==="object"?o:{});
-  for(const k of ["hist","vus","aRevoir","reussis","parties","hauts"])if(!Array.isArray(s[k]))s[k]=[];
-  if(!s.th||typeof s.th!=="object")s.th={};
+  for(const k of ["hist","vus","aRevoir","reussis","parties","hauts","conquis"])if(!Array.isArray(s[k]))s[k]=[];
+  for(const k of ["th","etoiles","finales"])if(!s[k]||typeof s[k]!=="object"||Array.isArray(s[k]))s[k]={};
+  if(!s.joute||typeof s.joute!=="object")s.joute={best:0,n:0};
+  if(s.quete&&(typeof s.quete!=="object"||!Array.isArray(s.quete.ids)||!Array.isArray(s.quete.faits)))s.quete=null;
   if(!s.tournoi||typeof s.tournoi!=="object")s.tournoi={};
   if(!s.tournoi.bilan||typeof s.tournoi.bilan!=="object")s.tournoi.bilan={};
   if(!("partie" in s.tournoi))s.tournoi.partie=null;
