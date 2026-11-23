@@ -27,5 +27,13 @@ Moteur : [Stockfish.js](https://github.com/nmrugg/stockfish.js) 19 lite (GPL-3),
 
 Règles du jeu : [chess.js](https://github.com/jhlywa/chess.js) (BSD-2). Polices : Uncial Antiqua, Nunito, Noto Sans Symbols 2 (SIL OFL).
 
+## Duel à distance
+L'onglet « Duel » permet de jouer à deux sur deux appareils. L'un crée le duel et envoie le code (ou le lien) à l'autre, qui le tape dans « Rejoindre ».
+- Aucun compte à créer, aucun serveur à nous : les messages passent par le relais public gratuit [ntfy.sh](https://ntfy.sh) (logiciel libre, Apache-2.0/GPL-2), sans compte.
+- Seuls les coups et le nom de chevalier sont envoyés, chiffrés de bout en bout (AES-GCM, clé tirée du code, jamais envoyée). Le relais voit l'adresse IP des appareils et l'heure des messages ; il garde les messages chiffrés 12 heures.
+- Limites du relais gratuit, lues dans ses réponses (novembre 2026) : 60 requêtes par 5 minutes et 250 messages par jour et par adresse IP (un coup = un message, soit 5 parties environ par jour) ; aucune garantie de disponibilité. Les conditions de ntfy.sh demandent un utilisateur majeur : c'est le parent qui met en place le duel.
+- Pour un autre relais ntfy (par exemple auto-hébergé) : `localStorage.setItem("salle-armes-relais","https://mon-relais")` dans la console.
+- L'Action « Test du relais du duel » vérifie que ntfy.sh accepte les envois depuis un navigateur.
+
 ## Licence
 GPL-3.0 (voir `LICENSE`). Le code source complet est dans ce dépôt ; celui de Stockfish.js est sur https://github.com/nmrugg/stockfish.js.

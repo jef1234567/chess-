@@ -70,6 +70,8 @@ const nbTranches = Math.ceil((COTE_MAX - COTE_MIN) / TRANCHE);
 const cand = {}; // thème → tranche → [{h, ligne}]
 const garde = (th) => Math.ceil(QUOTAS[th] / nbTranches) * 4; // marge pour les rejets
 
+// Problèmes écartés après vérification par Stockfish (lot 12) : un autre coup gagne autant que la solution.
+const EXCLUS = new Set(["vDjYg"]);
 let lus = 0;
 const rl = readline.createInterface({ input: process.stdin, crlfDelay: Infinity });
 rl.on("line", (l) => {
@@ -77,6 +79,7 @@ rl.on("line", (l) => {
   const c = l.split(",");
   if (c.length < 8) return;
   const [id, fen, moves, rating, dev, pop, plays, themes] = c;
+  if (EXCLUS.has(id)) return;
   const r = +rating;
   if (r < COTE_MIN || r >= COTE_MAX || +dev > 100 || +pop < 85 || +plays < 300) return;
   const uci = moves.split(" ");

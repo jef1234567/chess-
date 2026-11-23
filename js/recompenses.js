@@ -22,6 +22,7 @@ const HAUTS=[
   {k:"chevalier",nom:"Vainqueur du Chevalier",desc:"Battre le Chevalier au tournoi.",test:()=>vic("chevalier")>0},
   {k:"baron",nom:"Vainqueur du Baron",desc:"Battre le Baron au tournoi.",test:()=>vic("baron")>0},
   {k:"duc",nom:"Vainqueur du Duc",desc:"Battre le Duc au tournoi.",test:()=>vic("duc")>0,prix:"plateau:royal"},
+  {k:"roi",nom:"Vainqueur du Roi",desc:"Battre le Roi Arthur au tournoi.",test:()=>vic("roi")>0},
   {k:"conseil",nom:"Sage écuyer",desc:"Écouter le conseil de guerre.",test:()=>S.conseils>=1},
   {k:"coffre",nom:"Chasseur de trésor",desc:"Ouvrir le coffre d'une quête du jour.",test:()=>S.coffres>=1},
   {k:"etoiles50",nom:"Ciel étoilé",desc:"Gagner 50 étoiles.",test:()=>totalEtoiles()>=50},

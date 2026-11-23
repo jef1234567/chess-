@@ -95,3 +95,17 @@ Retour de Jean-François (2026-11-23) : « au tournoi, il me bloque des coups »
 - ✅ Chaque coup impossible est expliqué : pièce clouée, roi en échec qu'il faut sauver, case attaquée pour le roi, roque interdit, déplacement de la pièce (partout : salle, tournoi, conseil).
 - ✅ Toucher pendant que l'adversaire réfléchit : message « Attends ton tour ».
 - ✅ Glisser-déposer au doigt, en plus du toucher case par case.
+
+## Lot 12 — Simulations et équilibrage ✅ (sauf essai avec le joueur)
+Demande de Jean-François (2026-11-23) : simuler des centaines de parties et d'épreuves pour trouver bugs, équilibrage et ergonomie.
+- ✅ 2 392 épreuves revérifiées par Stockfish (profondeur 12, 3 meilleurs coups) : aucune solution fausse ; 1 épreuve Lichess (LvDjYg) où un autre coup gagne autant que la solution, désormais écartée (`EXCLUS` dans `js/puzzles.js` et dans l'importeur).
+- ✅ Les 2 391 épreuves jouées dans le navigateur (bon coup, puis erreur suivie de la correction) : aucune erreur, aucun blocage.
+- ✅ Tournoi : 2 000 parties simulées entre niveaux. Avant, chaque niveau battait le précédent 9 fois sur 10 (Page→Écuyer 88 %, Écuyer→Chevalier 91 %, Chevalier→Baron 98 %) : des marches trop hautes. Après réglage (1 000 parties de plus), environ 3 sur 4 entre niveaux voisins pour les quatre premiers. 7 chevaliers : Page, Écuyer, Chevalier, Baron, Comte (Gauvain, nouveau), Duc, Roi (Arthur, nouveau, défi final), et un haut fait « Vainqueur du Roi ».
+- ⏳ Constat non corrigé : la promotion se fait toujours en dame (aucun problème n'exige une sous-promotion). Le calibrage réel dépend du niveau de l'enfant : à ajuster après essais.
+
+## Lot 13 — Duel à distance ✅ (sauf essai sur deux vrais téléphones)
+Demande de Jean-François (2026-11-23) : jouer père contre fils sur deux téléphones, à distance.
+- ✅ Onglet « Duel » (`js/duel.js`) : créer un duel (couleur au choix), envoyer le code de 12 caractères ou le lien, rejoindre en tapant le code. Abandon, revanche en changeant de couleur, partie gardée sur l'appareil et reprise au retour, bilan dans le blason, partie archivée pour le conseil de guerre, 30 XP par victoire.
+- ✅ Relais public ntfy.sh sans compte ; coups chiffrés de bout en bout ; le service worker ne met plus en cache les requêtes vers d'autres sites.
+- ✅ Testé dans Chromium avec un relais local imitant ntfy : 70 demi-coups entre deux « téléphones », rechargement d'un côté en pleine partie, coupure du relais, abandon, revanche. Envoi et lecture sur le vrai ntfy.sh vérifiés par l'Action « Test du relais du duel ».
+- ⏳ Essai réel père et fils (4G et Wi-Fi).

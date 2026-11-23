@@ -140,7 +140,7 @@ header .ecu{width:28px;height:34px}
 nav{position:static;flex:none;padding-block:4px calc(4px + env(safe-area-inset-bottom,0px))}
 nav button{min-height:42px;padding:6px 10px}
 .jeu{flex:1;min-height:0;display:flex;flex-direction:column;gap:6px}
-#vTournoi:not([hidden]){flex:1;min-height:0}
+#vTournoi:not([hidden]),#vDuel:not([hidden]){flex:1;min-height:0}
 .chips{flex:none;padding-bottom:2px}
 .chip{min-height:34px;padding:5px 11px}
 .mission{flex:none;padding:6px 10px;gap:10px}
@@ -156,7 +156,7 @@ nav button{min-height:42px;padding:6px 10px}
 .parchemin p{line-height:1.35;font-size:.95rem}
 .actions{flex:none;gap:6px}
 .jeu .actions button{flex:1 1 auto;min-height:44px;padding:8px 10px}
-.blason,#tChoix{max-width:640px;width:100%;margin-inline:auto}
+.blason,#tChoix,.dCarte{max-width:640px;width:100%;margin-inline:auto}
 @media (min-width:700px){.titre{font-size:1.3rem}header .ecu{width:34px;height:40px}.mission h2{font-size:1.15rem}.mission p,.parchemin p{font-size:1rem}}
 /* Paysage : échiquier à gauche, le reste en colonne à droite. */
 @media (orientation:landscape) and (min-width:600px){
@@ -304,3 +304,8 @@ h3.sep{margin-top:18px}
 #carteRoyaume .parchemin-carte .note{animation:none;color:#5a4520}
 .parchemin-carte button{flex:none}
 .carte-svg{height:68vh;height:68dvh}
+/* Duel à distance (lot 13) */
+.dCarte input{width:100%;font-size:1.3rem;letter-spacing:.12em;text-transform:uppercase;text-align:center}
+.dCodeGrand{font-family:var(--f-corps);font-weight:800;font-size:clamp(1.6rem,8vw,2.4rem);letter-spacing:.08em;color:var(--or-pale);text-align:center;margin:8px 0 14px;user-select:all}
+.dCarte .actions{display:flex;gap:8px;flex-wrap:wrap}.dCarte .actions button{flex:1 1 auto}
+.theme-tag.ko{background:#5a1d24;color:#ffd7d7}

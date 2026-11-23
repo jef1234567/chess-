@@ -3,6 +3,7 @@
 // Une épreuve : PZ.line alterne les coups à partir du trait de PZ.fen. Si PZ.a vaut 1,
 // le premier coup est celui de l'adversaire et l'appli le joue toute seule (problèmes Lichess).
 const MATS=["mat1","mat2"];
+for(let i=P.length-1;i>=0;i--)if(EXCLUS.includes(P[i].id))P.splice(i,1);
 let partie=0; // change à chaque épreuve : les minuteries d'une ancienne épreuve s'annulent
 function plus(fn,ms){const n=partie;setTimeout(()=>{if(n===partie)fn();},ms);}
 function forcedMate1(g){ // après le coup du joueur : chaque réponse laisse un mat en 1
@@ -66,13 +67,13 @@ function charger(p){
   } else $("parch").innerHTML=`<p>Tu joues les <b>${blanc?"blancs":"noirs"}</b>. Touche une pièce, puis la case où tu veux la jouer.</p>`;
 }
 function tap(sq){
-  const conseil=mode==="tournoi"&&!$("cJeu").hidden,tournoi=mode==="tournoi"&&!conseil;
-  if(conseil?!cPeutJouer():tournoi?!tPeutJouer():(etat!=="jeu"&&etat!=="corrige"))return;
+  const conseil=mode==="tournoi"&&!$("cJeu").hidden,tournoi=mode==="tournoi"&&!conseil,duel=mode==="duel";
+  if(duel?!dPeutJouer():conseil?!cPeutJouer():tournoi?!tPeutJouer():(etat!=="jeu"&&etat!=="corrige"))return;
   const p=G.get(sq);
   if(sel&&sel!==sq){
     const mv=G.moves({square:sel,verbose:true}).find(m=>m.to===sq);
-    if(mv){(conseil?cJouer:tournoi?tJouer:jouer)(mv);return;}
-    const q=G.get(sq);if(!q||q.color!==G.turn()){pourquoiPas(sel,sq,conseil?cMsg:tournoi?tMsg:m=>$("parch").innerHTML=`<p>${m}</p>`);clearMarks();sel=null;return;}
+    if(mv){(duel?dJouer:conseil?cJouer:tournoi?tJouer:jouer)(mv);return;}
+    const q=G.get(sq);if(!q||q.color!==G.turn()){pourquoiPas(sel,sq,duel?dMsg:conseil?cMsg:tournoi?tMsg:m=>$("parch").innerHTML=`<p>${m}</p>`);clearMarks();sel=null;return;}
   }
   clearMarks();
   if(p&&p.color===G.turn()&&sel!==sq){
@@ -168,10 +169,11 @@ function majBlason(){
   $("themes").innerHTML=Object.keys(THEMES).map(k=>{const t=S.th[k]||{ok:0,n:0};const pc=t.n?Math.round(t.ok/t.n*100):0;
     return `<div class="th"><span>${THEMES[k]}</span><em>${t.ok}/${t.n}</em><div class="bar"><i style="width:${pc}%"></i></div></div>`;}).join("");
   $("tBilan").innerHTML=NIVEAUX.map(n=>{const b=S.tournoi.bilan[n.k]||{v:0,n:0,d:0};
-    return `<div class="th"><span>${n.nom}</span><em>${b.v} victoire${b.v>1?"s":""} · ${b.n} nulle${b.n>1?"s":""} · ${b.d} défaite${b.d>1?"s":""}</em></div>`;}).join("");
+    return `<div class="th"><span>${n.nom}</span><em>${b.v} victoire${b.v>1?"s":""} · ${b.n} nulle${b.n>1?"s":""} · ${b.d} défaite${b.d>1?"s":""}</em></div>`;}).join("")+
+    (S.duels.v+S.duels.n+S.duels.d?`<div class="th"><span>Duels à distance</span><em>${S.duels.v} victoire${S.duels.v>1?"s":""} · ${S.duels.n} nulle${S.duels.n>1?"s":""} · ${S.duels.d} défaite${S.duels.d>1?"s":""}</em></div>`:"");
   const RES={victoire:["Victoire","#9be3b8"],defaite:["Défaite","#ffb3b8"],nulle:["Nulle","#f3dc94"],abandon:["Abandon","#ffb3b8"]};
   $("parties").innerHTML=S.parties.length?S.parties.map((p,i)=>{const n=nivDe(p.niv);const r=RES[p.res]||["?","#fff"];
-    return `<div><span>${new Date(p.d).toLocaleDateString("fr-FR",{day:"numeric",month:"short"})} · ${n.finale?n.finale.nom:n.chev} · <b style="color:${r[1]}">${r[0]}</b></span><button type="button" class="petit" data-p="${i}">Conseil</button></div>`;}).join(""):'<p class="note">Aucune partie pour l\'instant. Va au tournoi !</p>';
+    return `<div><span>${new Date(p.d).toLocaleDateString("fr-FR",{day:"numeric",month:"short"})} · ${n.finale?n.finale.nom:p.niv==="duel"?"Duel contre "+esc(p.adv||"?"):n.chev} · <b style="color:${r[1]}">${r[0]}</b></span><button type="button" class="petit" data-p="${i}">Conseil</button></div>`;}).join(""):'<p class="note">Aucune partie pour l\'instant. Va au tournoi !</p>';
   $("hist").innerHTML=S.hist.length?S.hist.map(h=>`<div><span>${THEMES[h.t]}</span><span style="color:${h.ok?"#9be3b8":"#ffb3b8"}">${h.ok?"Réussi":"Raté"}</span></div>`).join(""):'<p class="note">Aucune épreuve pour l\'instant. Va à la salle d\'armes !</p>';
 }
 function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
@@ -199,6 +201,7 @@ function caseDe(e){const r=B.getBoundingClientRect();let f=Math.floor((e.clientX
 let glis=null;
 B.addEventListener("pointerdown",e=>{if(e.button>0)return;const sq=caseDe(e);if(!sq)return;ac();
   if(mode==="tournoi"&&$("cJeu").hidden&&T.g&&T.etat==="pense"){tMsg(`Attends ton tour : <b>${T.niv.chev}</b> réfléchit…`);return;}
+  if(mode==="duel"&&D.jeu&&!dTermine()&&G.turn()!==dCamp()){dMsg(`Attends ton tour : <b>${esc(D.adv||"ton adversaire")}</b> réfléchit…`);return;}
   tap(sq);
   if(sel===sq&&pieces[sq]){glis={de:sq,el:pieces[sq],x:e.clientX,y:e.clientY,bouge:false};try{B.setPointerCapture(e.pointerId);}catch(x){}}});
 B.addEventListener("pointermove",e=>{if(!glis)return;const dx=e.clientX-glis.x,dy=e.clientY-glis.y;
@@ -224,7 +227,7 @@ function onglet(v){
   if(mode==="salle"){partie++;if(J.actif){jouteArreter();$("mTheme").textContent=THEMES[PZ.t];}} // les minuteries d'épreuve en cours s'annulent
   if(mode==="tournoi"){if(!$("cJeu").hidden)cQuitter();T.jeton++;MOTEUR.stop();} // la réflexion de l'adversaire reprendra au retour
   mode=v;
-  for(const[k,id,t]of[["salle","vSalle","tSalle"],["tournoi","vTournoi","tTournoiB"],["blason","vBlason","tBlason"]]){
+  for(const[k,id,t]of[["salle","vSalle","tSalle"],["tournoi","vTournoi","tTournoiB"],["duel","vDuel","tDuelB"],["blason","vBlason","tBlason"]]){
     $(id).hidden=k!==v;$(t).setAttribute("aria-current",k===v);}
   clearMarks();sel=null;
   if(v==="salle"){
@@ -236,11 +239,12 @@ function onglet(v){
     $("tSlot").appendChild($("plateau"));
     MOTEUR.demarrer();tAfficher();tEntete();
     if(T.g&&T.etat==="pense")tAdversaire(); // la réflexion avait été interrompue
-  }else majBlason();
+  }else if(v==="duel")dOnglet();
+  else majBlason();
   scrollTo(0,0);
 }
 $("parties").onclick=e=>{const b=e.target.closest("button[data-p]");if(b)conseilOuvrir(+b.dataset.p);};
-$("tSalle").onclick=()=>onglet("salle");$("tTournoiB").onclick=()=>onglet("tournoi");$("tBlason").onclick=()=>onglet("blason");
+$("tSalle").onclick=()=>onglet("salle");$("tTournoiB").onclick=()=>onglet("tournoi");$("tBlason").onclick=()=>onglet("blason");$("tDuelB").onclick=()=>onglet("duel");
 const ch=$("chips");ch.dataset.f="tous";
 ch.innerHTML=`<button type="button" class="chip special" data-k="quete">Quête du jour</button><button type="button" class="chip special" data-k="carte">Carte du royaume</button><button type="button" class="chip special" data-k="joute">Joute 3 min</button>`+
   [["tous","Toutes les bottes"],...Object.entries(THEMES)].map(([k,v])=>`<button type="button" class="chip${k==="tous"?" on":""}" data-k="${k}">${v}</button>`).join("");
@@ -271,4 +275,9 @@ $("apPlein").onclick=()=>{S.pleinEcran=!S.pleinEcran;save();majPlein();
 majPlein();
 majEntete();charger(choisir());
 if(tReprendre()){tMsg(`Ta partie contre <b>${T.niv.nom}</b> t'attend. À toi de jouer !`);}
+// Duel à distance : reprise d'un duel en cours, ou lien d'invitation (#duel=CODE)
+dReprendre().then(()=>{const m=location.hash.match(/duel=([A-Za-z0-9-]+)/);if(!m)return;
+  history.replaceState(null,"",location.pathname+location.search);const c=dNormaliser(m[1]);
+  onglet("duel");if(D.code===c)return;if(!D.code){$("dCode").value=dJoli(c);$("dErreur").textContent="Touche « Rejoindre » pour entrer dans le duel.";}
+  else $("dErreur").textContent="Un autre duel est en cours : quitte-le d'abord pour rejoindre celui-ci.";});
 if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}
