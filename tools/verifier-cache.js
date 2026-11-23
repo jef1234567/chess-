@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* Vérifie que chaque ressource de l'appli (js/, css/, fonts/, icons/, vendor/stockfish/ et fichiers racine ; les textes de licence exceptés)
+/* Vérifie que chaque ressource de l'appli (js/, css/, fonts/, icons/, vendor/stockfish/, pieces/ et fichiers racine ; les textes de licence exceptés)
  * est listée dans sw.js, et que chaque fichier listé existe. Code de sortie 1 sinon. */
 "use strict";
 const fs = require("fs");
@@ -8,7 +8,7 @@ const racine = path.join(__dirname, "..");
 const sw = fs.readFileSync(path.join(racine, "sw.js"), "utf8");
 const liste = JSON.parse(sw.match(/const FICHIERS=(\[[^\]]*\])/)[1]);
 const attendus = ["index.html", "chess.js", "manifest.webmanifest"];
-for (const d of ["js", "css", "fonts", "icons", "vendor/stockfish"])
+for (const d of ["js", "css", "fonts", "icons", "vendor/stockfish", "pieces/fantasy", "pieces/celtic"])
   if (fs.existsSync(path.join(racine, d)))
     for (const f of fs.readdirSync(path.join(racine, d))) if (!/\.txt$/.test(f)) attendus.push(`${d}/${f}`);
 let ko = 0;

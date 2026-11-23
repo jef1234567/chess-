@@ -16,6 +16,7 @@ async function conseilOuvrir(n){
   if(mode!=="tournoi")onglet("tournoi");
   T.jeton++;MOTEUR.stop(); // une partie en cours attend pendant le conseil
   C.partie=p;C.cles=[];C.i=0;C.montre=false;const jeton=++C.jeton;
+  S.conseils=(S.conseils||0)+1;save();hautsVerifier();
   $("tChoix").hidden=true;$("tJeu").hidden=true;$("cJeu").hidden=false;$("cSlot").appendChild($("plateau"));
   ["cPrec","cSuiv","cMontrer"].forEach(id=>$(id).disabled=true);$("cExplique").hidden=true;
   $("cTexte").textContent=`Ta partie contre ${(NIVEAUX.find(x=>x.k===p.niv)||NIVEAUX[0]).nom}`;$("cNum").textContent="…";

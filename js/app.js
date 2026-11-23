@@ -129,7 +129,7 @@ function bilan(ok,gain){
   if(!ok||indice>=2)S.aRevoir.push(PZ.id);S.aRevoir=S.aRevoir.slice(-50);
   if(ok&&!S.reussis.includes(PZ.id))S.reussis.push(PZ.id);
   S.hist.unshift({id:PZ.id,t:PZ.t,ok,d:Date.now()});S.hist=S.hist.slice(0,12);
-  save();majEntete();
+  save();majEntete();hautsVerifier();
 }
 function majEntete(){
   const[g,n]=gradeDe(S.xp);
@@ -138,7 +138,7 @@ function majEntete(){
   $("salut").textContent=S.nom.trim()?`En garde, ${S.nom.trim()} !`:"Entraîne-toi, jeune écuyer";
 }
 function majBlason(){
-  iaMajReglages();
+  iaMajReglages();majApparence();
   const[g,n]=gradeDe(S.xp);
   $("gGrade").textContent=g[1];$("gProchain").textContent=n?`Encore ${n[0]-S.xp} XP pour devenir ${n[1]}`:"Grade le plus haut atteint !";
   $("nom").value=S.nom;$("sReussi").textContent=S.reussi;$("sSerie").textContent=S.best;$("sCote").textContent=S.cote;

@@ -45,6 +45,8 @@ Légende : ✅ fait · 🔄 en cours · ⏳ à faire
 - ✅ Testé dans Chromium avec une API simulée : requête, affichage (texte échappé), clé refusée, oubli de la clé.
 - ⏳ Essai avec une vraie clé (Jean-François).
 
-## Lot 6 — Habillage ⏳
-- Pièces illustrées : jeu libre existant (licence vérifiée), pas de création sur mesure.
-- Sons, récompenses à débloquer, test réel avec l'enfant sur la Samsung.
+## Lot 6 — Habillage 🔄
+- ✅ Pièces illustrées libres : jeux « Fantaisie » et « Celtiques » de Maurizio Monge ([chess-art](https://github.com/maurimo/chess-art), licence MIT vérifiée, fichiers tirés du dépôt de Lichess), plus les pièces classiques d'origine. Choix dans le blason.
+- ✅ Sons : échec (trompette brève) et fanfare de haut fait, en plus des sons existants ; tous synthétisés, aucun fichier.
+- ✅ Récompenses : 14 hauts faits (séries, mats, thèmes, grades, victoires au tournoi, conseil de guerre). Certains débloquent les pièces Celtiques et les échiquiers Forêt, Sable et Or royal.
+- ⏳ Test réel avec l'enfant sur la Samsung (Jean-François, après publication) : fluidité, force des niveaux du tournoi, goût pour les pièces et les récompenses.

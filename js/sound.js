@@ -6,5 +6,7 @@ const SON={
   coup(){tone(180,.08,"triangle",.25);tone(90,.1,"sine",.2)},
   prise(){[523,1046,1568,2090].forEach((f,i)=>tone(f*1.01,.5-i*.08,"sine",.12));tone(140,.15,"square",.08)},
   victoire(){[523,659,784,1046].forEach((f,i)=>tone(f,.35,"triangle",.18,i*.11))},
-  rate(){tone(220,.25,"sawtooth",.08);tone(165,.4,"sawtooth",.08,.18)}
+  rate(){tone(220,.25,"sawtooth",.08);tone(165,.4,"sawtooth",.08,.18)},
+  echec(){tone(880,.12,"square",.06,.05);tone(660,.18,"square",.06,.17)}, // « échec ! » : deux coups de trompette brefs
+  fanfare(){[392,523,659,784,659,1046].forEach((f,i)=>tone(f,i===5?.6:.18,"triangle",.16,i*.12))} // haut fait débloqué
 };
