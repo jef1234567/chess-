@@ -72,6 +72,7 @@ function tap(sq){
   if(sel&&sel!==sq){
     const mv=G.moves({square:sel,verbose:true}).find(m=>m.to===sq);
     if(mv){(conseil?cJouer:tournoi?tJouer:jouer)(mv);return;}
+    const q=G.get(sq);if(!q||q.color!==G.turn()){pourquoiPas(sel,sq,conseil?cMsg:tournoi?tMsg:m=>$("parch").innerHTML=`<p>${m}</p>`);clearMarks();sel=null;return;}
   }
   clearMarks();
   if(p&&p.color===G.turn()&&sel!==sq){
@@ -176,8 +177,35 @@ function majBlason(){
 function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
 
 /* ---------- Interface ---------- */
-B.addEventListener("click",e=>{const r=B.getBoundingClientRect();let f=Math.floor((e.clientX-r.left)/r.width*8),rr=Math.floor((e.clientY-r.top)/r.height*8);
-  if(f<0||f>7||rr<0||rr>7)return;if(flip){f=7-f;rr=7-rr;}ac();tap(files[f]+(8-rr));});
+/* Un coup impossible n'est jamais refusé en silence : on explique pourquoi (règles des échecs). */
+const NOMS={p:"Le pion",n:"Le cavalier",b:"Le fou",r:"La tour",q:"La dame",k:"Le roi"};
+function pourquoiPas(de,a,dire){
+  const p=G.get(de);if(!p)return;
+  const g=new Chess(G.fen()),echecAvant=g.in_check();
+  let msg;
+  if(p.type==="k"&&Math.abs(files.indexOf(de[0])-files.indexOf(a[0]))===2&&de[1]===a[1])
+    msg="Tu ne peux pas roquer maintenant : le roi ou la tour a déjà bougé, une pièce gêne, ou le roi passerait par une case attaquée.";
+  else{
+    g.remove(de);g.remove(a);g.put(p,a); // la pièce posée là : le roi serait-il en échec ?
+    if(g.in_check())msg=echecAvant?"Ton roi est en échec : ce coup ne le sauve pas. Prends la pièce qui attaque, mets une pièce devant, ou bouge ton roi !"
+      :p.type==="k"?"Ton roi serait en échec sur cette case : elle est attaquée.":`${NOMS[p.type]} protège ton roi : s'il bouge, ton roi est en échec. Il est cloué !`;
+    else msg=`${NOMS[p.type]} ne peut pas aller là : ${{p:"il avance tout droit et prend en diagonale.",n:"il saute en L.",b:"il va en diagonale, sans sauter par-dessus les pièces.",r:"elle va tout droit, sans sauter par-dessus les pièces.",q:"elle va tout droit ou en diagonale, sans sauter par-dessus les pièces.",k:"il avance d'une case."}[p.type]}`;
+  }
+  dire(`<span class="ko">Coup impossible.</span> ${msg}`);
+}
+/* Toucher (une case puis une autre) ou glisser une pièce avec le doigt. */
+function caseDe(e){const r=B.getBoundingClientRect();let f=Math.floor((e.clientX-r.left)/r.width*8),rr=Math.floor((e.clientY-r.top)/r.height*8);
+  if(f<0||f>7||rr<0||rr>7)return null;if(flip){f=7-f;rr=7-rr;}return files[f]+(8-rr);}
+let glis=null;
+B.addEventListener("pointerdown",e=>{if(e.button>0)return;const sq=caseDe(e);if(!sq)return;ac();
+  if(mode==="tournoi"&&$("cJeu").hidden&&T.g&&T.etat==="pense"){tMsg(`Attends ton tour : <b>${T.niv.chev}</b> réfléchit…`);return;}
+  tap(sq);
+  if(sel===sq&&pieces[sq]){glis={de:sq,el:pieces[sq],x:e.clientX,y:e.clientY,bouge:false};try{B.setPointerCapture(e.pointerId);}catch(x){}}});
+B.addEventListener("pointermove",e=>{if(!glis)return;const dx=e.clientX-glis.x,dy=e.clientY-glis.y;
+  if(!glis.bouge&&Math.hypot(dx,dy)<8)return;glis.bouge=true;glis.el.style.zIndex=6;glis.el.style.transform=tr(glis.de,` translate(${dx}px,${dy}px) scale(1.15)`);});
+function finGlisse(e){if(!glis)return;const g=glis;glis=null;if(!g.bouge)return;
+  g.el.style.zIndex="";place(g.el,g.de);const sq=caseDe(e);if(sq&&sq!==g.de&&sel===g.de){poseDirecte=true;tap(sq);poseDirecte=false;}}
+B.addEventListener("pointerup",finGlisse);B.addEventListener("pointercancel",e=>{if(glis){glis.el.style.zIndex="";place(glis.el,glis.de);glis=null;}});
 $("bSuivant").onclick=()=>{ac();charger(choisir());};
 /* Indice gradué : 1) la pièce à jouer, 2) la case d'arrivée, 3) la solution. Chaque indice coûte une étoile. */
 $("bIndice").onclick=()=>{if(etat!=="jeu")return;const g=new Chess(G.fen());const mv=g.move(PZ.line[step_]);if(!mv)return;
