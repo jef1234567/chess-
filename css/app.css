@@ -113,3 +113,17 @@ button.petit{min-height:36px;padding:6px 12px;font-size:.85rem}
 /* Mode connecté (lot 5) */
 .parchemin p.ia{margin-top:10px;padding-top:10px;border-top:1px dashed #3a4a7a}
 #iaCle{width:100%}
+/* Habillage (lot 6) : pièces illustrées, thèmes d'échiquier, hauts faits */
+.pc img{width:92%;height:92%;object-fit:contain;filter:drop-shadow(0 3px 3px #0006);user-select:none}
+.pc.up img{animation:leve .25s ease-out forwards}
+.hauts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.haut{border:1px solid #2c3a66;border-radius:12px;padding:10px;background:var(--nuit)}
+.haut b{display:block;color:var(--or-pale);font-size:.9rem}
+.haut span{font-size:.78rem;color:var(--texte-doux)}
+.haut.verrou{opacity:.45;filter:grayscale(1)}
+.haut .prix{display:block;margin-top:4px;color:#9be3b8}
+.chip:disabled{opacity:.4}
+.annonce{position:fixed;left:50%;top:16px;transform:translate(-50%,-150%);z-index:20;background:#10172ef0;border:2px solid var(--or);color:var(--or-pale);border-radius:14px;padding:10px 16px;max-width:calc(100% - 32px);text-align:center;transition:transform .4s ease-out;font-weight:800}
+.annonce.on{transform:translate(-50%,0)}
+.annonce small{display:block;color:var(--texte);font-weight:600}
+@media (prefers-reduced-motion:reduce){.annonce{transition:none}.pc.up img{animation:none}}

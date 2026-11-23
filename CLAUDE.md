@@ -18,12 +18,12 @@ Licence : GPL-3 (fichier `LICENSE`), imposée par Stockfish.
 
 ## Architecture
 - `index.html` : squelette de la page ; charge `css/app.css` puis les scripts dans l'ordre ci-dessous (scripts classiques, sans module ni build).
-- `js/puzzles.js` (thèmes, problèmes faits main), `js/lichess.js` (problèmes Lichess, généré par `tools/importer-lichess.js` via `.github/workflows/import-lichess.yml`, ne pas modifier à la main), `js/profile.js` (grades, sauvegarde), `js/sound.js` (sons), `js/board.js` (échiquier, animations), `js/tournoi.js` (partie contre Stockfish), `js/conseil.js` (débrief des parties), `js/connecte.js` (mode connecté : explications par l'API Claude), `js/app.js` (logique d'épreuve, onglets, blason, interface).
+- `js/puzzles.js` (thèmes, problèmes faits main), `js/lichess.js` (problèmes Lichess, généré par `tools/importer-lichess.js` via `.github/workflows/import-lichess.yml`, ne pas modifier à la main), `js/profile.js` (grades, sauvegarde), `js/sound.js` (sons), `js/board.js` (échiquier, animations), `js/tournoi.js` (partie contre Stockfish), `js/conseil.js` (débrief des parties), `js/connecte.js` (mode connecté : explications par l'API Claude), `js/recompenses.js` (hauts faits, apparence), `js/app.js` (logique d'épreuve, onglets, blason, interface).
 - `vendor/stockfish/` : Stockfish.js 19 lite mono-fil (npm `stockfish` 19.0.1, GPL-3), ne pas modifier ; lancé en Web Worker.
 - `tools/verif-lib.js` : règles de vérification partagées ; `tools/verifier.js` : vérification des problèmes ; `tools/verifier-cache.js` : contrôle de la liste de `sw.js`. Lancés par `.github/workflows/verifier.yml`.
 - `chess.js` : règles du jeu (chess.js 0.10.3, BSD-2), ne pas modifier.
 - `sw.js` + `manifest.webmanifest` : installation et cache hors ligne.
-- `fonts/`, `icons/` : ressources locales.
+- `fonts/`, `icons/`, `pieces/` (jeux de pièces SVG, MIT) : ressources locales.
 
 ## Règles de travail
 - Une branche par lot (`lot-1-socle`, …), fusion dans `main` après vérification.

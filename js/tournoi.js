@@ -142,7 +142,7 @@ function tFin(){
     const pourquoi=g.in_stalemate()?"pat : le roi ne peut plus bouger sans être en échec":g.in_threefold_repetition()?"la même position est revenue trois fois":g.insufficient_material()?"il ne reste pas assez de pièces pour faire mat":"règle des 50 coups";
     txt=`<span class="ok">Partie nulle (${pourquoi}). +${gain} XP</span>`;
   }
-  S.tournoi.bilan[T.niv.k]=b;S.xp+=gain;tArchiver(g.in_checkmate()?(g.turn()!==T.camp?"victoire":"defaite"):"nulle");tSauver();majEntete();
+  S.tournoi.bilan[T.niv.k]=b;S.xp+=gain;tArchiver(g.in_checkmate()?(g.turn()!==T.camp?"victoire":"defaite"):"nulle");tSauver();majEntete();hautsVerifier();
   tMsg(txt);tEntete();$("tAbandon").disabled=true;
   return true;
 }

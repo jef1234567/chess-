@@ -1,5 +1,9 @@
 /* Échiquier : dessin, pièces, flèches, animations et étincelles. */
 const GLY={k:"♚",q:"♛",r:"♜",b:"♝",n:"♞",p:"♟︎"};
+// Jeux de pièces : « glyphes » (police locale) ou images SVG libres dans pieces/<jeu>/ (voir README).
+const JEUX_PIECES={fantasy:"Fantaisie",celtic:"Celtiques",glyphes:"Classiques"};
+function pieceHTML(c,t){const j=S.pieces;
+  return j&&j!=="glyphes"&&JEUX_PIECES[j]?`<img src="pieces/${j}/${c}${t.toUpperCase()}.svg" alt="" draggable="false">`:`<span>${GLY[t]}</span>`;}
 const $=id=>document.getElementById(id);
 
 /* ---------- Étincelles ---------- */
@@ -33,7 +37,7 @@ function draw(){
   // chess.js 0.10.3 ne fournit pas p.square : on calcule la case depuis la position dans le tableau.
   G.board().forEach((row,i)=>row.forEach((p,j)=>{if(p)addPiece(files[j]+(8-i),p);}));
 }
-function addPiece(sq,p){const e=document.createElement("div");e.className="pc "+p.color;e.innerHTML=`<span>${GLY[p.type]}</span>`;place(e,sq);B.appendChild(e);pieces[sq]=e;}
+function addPiece(sq,p){const e=document.createElement("div");e.className="pc "+p.color;e.innerHTML=pieceHTML(p.color,p.type);place(e,sq);B.appendChild(e);pieces[sq]=e;}
 function place(e,sq){const[f,r]=xy(sq);e.style.transform=`translate(${f*100}%,${r*100}%)`;}
 function sqEl(sq){return B.querySelector(`.sq[data-sq="${sq}"]`);}
 function clearMarks(){B.querySelectorAll(".sq").forEach(s=>{s.classList.remove("sel","hint");s.querySelectorAll(".dot,.ring").forEach(x=>x.remove());});}
@@ -47,8 +51,9 @@ function animMove(m){
   let capSq=m.captured?(m.flags.includes("e")?m.to[0]+m.from[1]:m.to):null;
   if(capSq&&pieces[capSq]){const c=pieces[capSq];delete pieces[capSq];c.classList.add("out");const[f,r]=xy(capSq);c.style.transform=`translate(${f*100}%,${r*100-60}%) rotate(${Math.random()<.5?-40:40}deg) scale(.6)`;setTimeout(()=>c.remove(),520);
     setTimeout(()=>burstAt(sqEl(m.to),22,["#e3b84b","#f3dc94","#ffffff"]),180);SON.prise();} else SON.coup();
+  if(m.san.includes("+")&&!m.san.includes("#"))SON.echec();
   delete pieces[m.from];pieces[m.to]=e;place(e,m.to);
   if(m.flags.includes("k")||m.flags.includes("q")){const rk=m.color==="w"?"1":"8",[rf,rt]=m.flags.includes("k")?["h","f"]:["a","d"];const re=pieces[rf+rk];delete pieces[rf+rk];pieces[rt+rk]=re;place(re,rt+rk);}
-  if(m.promotion){setTimeout(()=>{e.innerHTML=`<span>${GLY[m.promotion]}</span>`;},300);}
+  if(m.promotion){setTimeout(()=>{e.innerHTML=pieceHTML(m.color,m.promotion);},300);}
   markLast(m);
 }
