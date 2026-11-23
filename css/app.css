@@ -5,7 +5,7 @@
 @font-face{font-family:"Nunito";font-weight:800;src:url(../fonts/nunito-800.woff2) format("woff2");font-display:swap}
 @font-face{font-family:"Noto Sans Symbols 2";src:url(../fonts/symbols.woff2) format("woff2");font-display:block}
 *{box-sizing:border-box}
-:root{padding-top:env(safe-area-inset-top,0px)}
+body{padding-top:env(safe-area-inset-top,0px)}
 body{margin:0}
 [hidden]{display:none!important}
 /* Mise en page : une seule colonne façon tablette — bandeau du héraut, échiquier-écu au centre, parchemin de mission dessous ; onglets en bas. Thème nuit de château, volontairement unique. */
@@ -127,3 +127,55 @@ button.petit{min-height:36px;padding:6px 12px;font-size:.85rem}
 .annonce.on{transform:translate(-50%,0)}
 .annonce small{display:block;color:var(--texte);font-weight:600}
 @media (prefers-reduced-motion:reduce){.annonce{transition:none}.pc.up img{animation:none}}
+/* Plein écran (lot 7) : l'appli tient dans la hauteur de l'écran, sans défilement.
+   L'échiquier est le plus grand carré qui tient dans la place restante (requêtes de conteneur). */
+html,body{height:100%;overflow:hidden}
+body{display:flex;flex-direction:column;height:100vh;height:100dvh}
+.app{flex:1;min-height:0;width:100%;max-width:none;margin:0;overflow-y:auto;overscroll-behavior:contain;padding-block:6px;gap:6px}
+header{gap:8px;min-height:0}
+header .ecu{width:28px;height:34px}
+.titre{font-size:1.05rem}
+.sous{font-size:.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge b{font-size:.85rem}.xpbar{width:90px;margin-top:2px}
+nav{position:static;flex:none;padding-block:4px calc(4px + env(safe-area-inset-bottom,0px))}
+nav button{min-height:42px;padding:6px 10px}
+.jeu{flex:1;min-height:0;display:flex;flex-direction:column;gap:6px}
+#vTournoi:not([hidden]){flex:1;min-height:0}
+.chips{flex:none;padding-bottom:2px}
+.chip{min-height:34px;padding:5px 11px}
+.mission{flex:none;padding:6px 10px;gap:10px}
+.mission h2{font-size:1rem}.mission p{font-size:.82rem;margin:0}
+.trait{width:22px;height:22px}
+.slot{flex:1;min-height:120px;container-type:size;display:grid;place-items:center}
+.plateau{width:min(100cqw,100cqh);height:min(100cqw,100cqh);padding:1.5%;border-radius:12px}
+.board{width:100%;height:100%;aspect-ratio:auto;container-type:inline-size}
+.pc span{font-size:9.6cqw}
+.sq .co{font-size:clamp(8px,1.7cqw,14px)}
+.sceau div{font-size:clamp(24px,8cqmin,56px)}
+.parchemin{flex:none;padding:8px 12px;min-height:0;max-height:24vh;max-height:24dvh;overflow-y:auto}
+.parchemin p{line-height:1.35;font-size:.95rem}
+.actions{flex:none;gap:6px}
+.jeu .actions button{flex:1 1 auto;min-height:44px;padding:8px 10px}
+.blason,#tChoix{max-width:640px;width:100%;margin-inline:auto}
+@media (min-width:700px){.titre{font-size:1.3rem}header .ecu{width:34px;height:40px}.mission h2{font-size:1.15rem}.mission p,.parchemin p{font-size:1rem}}
+/* Paysage : échiquier à gauche, le reste en colonne à droite. */
+@media (orientation:landscape) and (min-width:600px){
+  .jeu{display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,34%);grid-template-rows:auto auto minmax(0,1fr) auto;column-gap:12px;align-content:stretch}
+  .jeu>.slot{grid-column:1;grid-row:1/-1;min-height:0}
+  .jeu>:not(.slot){grid-column:2}
+  .jeu>.chips{flex-wrap:wrap;overflow:auto;max-height:30vh;align-content:flex-start}
+  .jeu>.parchemin{max-height:none;align-self:start}
+  .jeu .actions{align-self:end}
+}
+@media (orientation:landscape) and (min-width:600px){.jeu>.chips{grid-row:1}.jeu>.mission{grid-row:2}.jeu>.parchemin{grid-row:3}.jeu>.actions{grid-row:4}}
+.jeu .actions{flex-wrap:nowrap}
+.jeu .actions button{flex:1 1 0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+nav button{white-space:nowrap}
+@media (max-width:440px){.jeu .actions button,nav button{font-size:.85rem;padding-inline:6px}}
+@media (max-height:500px){.sous,.mission p{display:none}.jeu>.chips{max-height:22vh}.jeu .actions button,nav button{min-height:38px;padding-block:4px}}
+@media (orientation:landscape) and (min-width:600px){
+  .jeu>.parchemin{align-self:stretch;max-height:100%;min-height:0}
+  .jeu .actions{display:grid;grid-template-columns:1fr 1fr}
+  .jeu .actions button:only-child,.jeu .actions button.or{grid-column:1/-1}
+}
+@media (orientation:landscape) and (max-height:500px){.jeu>.chips{flex-wrap:nowrap;overflow-x:auto}.mission .theme-tag{display:none}}
