@@ -7,6 +7,7 @@ Web app d'entraînement aux échecs pour enfants, univers chevaliers. Fonctionne
 - Indices, correction animée, difficulté qui s'adapte (cote d'armes)
 - Tournoi : partie contre Stockfish, du Page au Duc, avec un adversaire qui commente ses coups
 - Conseil de guerre : après la partie, les coups clés rejoués avec la flèche du meilleur coup
+- Mode connecté (facultatif) : avec une clé d'API Claude saisie dans le blason, le maître d'armes explique les erreurs en mots d'enfant
 - Blason : grades de Page à Duc, maîtrise par thème, historique (sauvegardé sur l'appareil)
 
 ## Installer sur la tablette

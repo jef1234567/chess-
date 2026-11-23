@@ -1,5 +1,5 @@
-const V="salle-armes-v5";
-const FICHIERS=["./","index.html","chess.js","css/app.css","js/puzzles.js","js/lichess.js","js/profile.js","js/sound.js","js/board.js","js/tournoi.js","js/conseil.js","js/app.js","vendor/stockfish/stockfish-19-lite-single.js","vendor/stockfish/stockfish-19-lite-single.wasm","manifest.webmanifest","icons/icon-192.png","icons/icon-512.png","fonts/uncial.woff2","fonts/nunito-400.woff2","fonts/nunito-700.woff2","fonts/nunito-800.woff2","fonts/symbols.woff2"];
+const V="salle-armes-v6";
+const FICHIERS=["./","index.html","chess.js","css/app.css","js/puzzles.js","js/lichess.js","js/profile.js","js/sound.js","js/board.js","js/tournoi.js","js/conseil.js","js/connecte.js","js/app.js","vendor/stockfish/stockfish-19-lite-single.js","vendor/stockfish/stockfish-19-lite-single.wasm","manifest.webmanifest","icons/icon-192.png","icons/icon-512.png","fonts/uncial.woff2","fonts/nunito-400.woff2","fonts/nunito-700.woff2","fonts/nunito-800.woff2","fonts/symbols.woff2"];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(FICHIERS)));self.skipWaiting();});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==V).map(x=>caches.delete(x)))));self.clients.claim();});
 self.addEventListener("fetch",e=>{if(e.request.method!=="GET")return;

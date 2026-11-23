@@ -38,9 +38,12 @@ Légende : ✅ fait · 🔄 en cours · ⏳ à faire
 - ✅ Testé dans Chromium : mat manqué bien repéré ; partie de 80 demi-coups analysée en 3 s avec un processeur ralenti 4 fois.
 - ⏳ Essai sur la tablette.
 
-## Lot 5 — Mode connecté ⏳
-- Explications par l'API Claude, en mots d'enfant, sur le débrief et les épreuves ratées.
-- Clé saisie dans les réglages, stockée sur l'appareil ; l'appli reste pleinement utilisable sans réseau.
+## Lot 5 — Mode connecté ✅ (sauf essai avec une vraie clé)
+- ✅ Bouton « Explique-moi » après une épreuve ratée ou la solution, et sur chaque coup clé du conseil de guerre (`js/connecte.js`). Le maître d'armes répond en 3 phrases au plus, en s'appuyant sur les coups donnés par le moteur ou la solution.
+- ✅ Clé saisie dans le blason, gardée sur l'appareil (clé `salle-armes-cle`, hors de la sauvegarde), bouton « Oublier la clé ». Sans clé ou sans réseau, les boutons restent cachés.
+- ✅ Modèle `claude-opus-5-5`, effort bas, repli automatique en cas de refus ; appel direct depuis le navigateur (CORS vérifié). Environ 1 centime par explication (estimation).
+- ✅ Testé dans Chromium avec une API simulée : requête, affichage (texte échappé), clé refusée, oubli de la clé.
+- ⏳ Essai avec une vraie clé (Jean-François).
 
 ## Lot 6 — Habillage ⏳
 - Pièces illustrées : jeu libre existant (licence vérifiée), pas de création sur mesure.
