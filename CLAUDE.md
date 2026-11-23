@@ -2,6 +2,8 @@
 
 Jeu d'échecs d'entraînement pour un enfant de 8 ans qui joue déjà relativement bien. Univers chevaliers. Web app installable (PWA), hors ligne d'abord.
 
+Licence : GPL-3 (fichier `LICENSE`), imposée par Stockfish.
+
 ## Public et ton
 - Joueur : enfant de 8 ans, lecteur. Phrases courtes, vocabulaire simple, tutoiement, ton encourageant.
 - Toute l'interface est en français.
@@ -16,7 +18,8 @@ Jeu d'échecs d'entraînement pour un enfant de 8 ans qui joue déjà relativeme
 
 ## Architecture
 - `index.html` : squelette de la page ; charge `css/app.css` puis les scripts dans l'ordre ci-dessous (scripts classiques, sans module ni build).
-- `js/puzzles.js` (thèmes, problèmes faits main), `js/lichess.js` (problèmes Lichess, généré par `tools/importer-lichess.js` via `.github/workflows/import-lichess.yml`, ne pas modifier à la main), `js/profile.js` (grades, sauvegarde), `js/sound.js` (sons), `js/board.js` (échiquier, animations), `js/app.js` (logique d'épreuve, blason, interface).
+- `js/puzzles.js` (thèmes, problèmes faits main), `js/lichess.js` (problèmes Lichess, généré par `tools/importer-lichess.js` via `.github/workflows/import-lichess.yml`, ne pas modifier à la main), `js/profile.js` (grades, sauvegarde), `js/sound.js` (sons), `js/board.js` (échiquier, animations), `js/tournoi.js` (partie contre Stockfish), `js/app.js` (logique d'épreuve, onglets, blason, interface).
+- `vendor/stockfish/` : Stockfish.js 19 lite mono-fil (npm `stockfish` 19.0.1, GPL-3), ne pas modifier ; lancé en Web Worker.
 - `tools/verif-lib.js` : règles de vérification partagées ; `tools/verifier.js` : vérification des problèmes ; `tools/verifier-cache.js` : contrôle de la liste de `sw.js`. Lancés par `.github/workflows/verifier.yml`.
 - `chess.js` : règles du jeu (chess.js 0.10.3, BSD-2), ne pas modifier.
 - `sw.js` + `manifest.webmanifest` : installation et cache hors ligne.

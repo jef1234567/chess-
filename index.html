@@ -27,16 +27,40 @@
       <div><h2 id="mTitre">…</h2><p id="mTexte">…</p></div>
       <div class="theme-tag" id="mTheme">…</div>
     </div>
-    <div class="plateau">
+    <div id="sSlot"><div class="plateau" id="plateau">
       <div class="board" id="board" aria-label="Échiquier"></div>
       <div class="sceau" id="sceau"><div id="sceauTxt">Bravo !</div></div>
-    </div>
+    </div></div>
     <div class="parchemin" id="parch"><p>Touche une pièce, puis la case où tu veux la jouer.</p></div>
     <div class="actions">
       <button id="bIndice" type="button">Indice</button>
       <button id="bSolution" type="button">Solution</button>
       <button id="bSuivant" class="or" type="button">Épreuve suivante</button>
       <button id="bSon" type="button" aria-pressed="true" title="Son">Son : oui</button>
+    </div>
+  </section>
+
+  <section id="vTournoi" class="tournoi" hidden>
+    <div class="carte" id="tChoix">
+      <h3>Le tournoi</h3>
+      <p class="note">Choisis ton adversaire. Le Page est le plus facile, le Duc le plus redoutable.</p>
+      <div class="chips wrap" id="tNiveaux" role="group" aria-label="Adversaire"></div>
+      <p class="note">Avec quelles pièces veux-tu jouer ?</p>
+      <div class="chips wrap" id="tCamps" role="group" aria-label="Couleur"></div>
+      <button id="tGo" class="or" type="button">En garde !</button>
+    </div>
+    <div id="tJeu" class="tjeu" hidden>
+      <div class="mission">
+        <div class="trait w" id="tTrait" aria-hidden="true"></div>
+        <div><h2 id="tTitre">Le tournoi</h2><p id="tTexte">Choisis ton adversaire.</p></div>
+        <div class="theme-tag" id="tNiv">—</div>
+      </div>
+      <div id="tSlot"></div>
+      <div class="parchemin" id="tParch"><p>…</p></div>
+      <div class="actions">
+        <button id="tNouvelle" class="or" type="button">Nouvelle partie</button>
+        <button id="tAbandon" type="button">Abandonner</button>
+      </div>
     </div>
   </section>
 
@@ -53,12 +77,14 @@
       <div class="stats"><div><b id="sReussi">0</b><span>épreuves réussies</span></div><div><b id="sSerie">0</b><span>meilleure série</span></div><div><b id="sCote">600</b><span>cote d'armes</span></div></div>
     </div>
     <div class="carte"><h3>Maîtrise des bottes</h3><div id="themes"></div></div>
+    <div class="carte"><h3>Tournoi</h3><div id="tBilan"></div></div>
     <div class="carte"><h3>Dernières épreuves</h3><div class="hist" id="hist"></div></div>
     <p class="note">La progression est gardée sur cet appareil uniquement.</p>
   </section>
 </div>
 <nav>
   <button id="tSalle" type="button" aria-current="true">Salle d'armes</button>
+  <button id="tTournoiB" type="button" aria-current="false">Tournoi</button>
   <button id="tBlason" type="button" aria-current="false">Mon blason</button>
 </nav>
 
@@ -68,6 +94,7 @@
 <script src="js/profile.js"></script>
 <script src="js/sound.js"></script>
 <script src="js/board.js"></script>
+<script src="js/tournoi.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

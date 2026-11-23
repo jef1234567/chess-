@@ -5,6 +5,7 @@ Web app d'entraînement aux échecs pour enfants, univers chevaliers. Fonctionne
 - Épreuves par thème : mat en 1, mat en 2, fourchette, attaque double, pièce gratuite, enfilade, clouage, découverte, défense, finale
 - Révision : les épreuves ratées reviennent, les thèmes difficiles sortent plus souvent
 - Indices, correction animée, difficulté qui s'adapte (cote d'armes)
+- Tournoi : partie contre Stockfish, du Page au Duc, avec un adversaire qui commente ses coups
 - Blason : grades de Page à Duc, maîtrise par thème, historique (sauvegardé sur l'appareil)
 
 ## Installer sur la tablette
@@ -15,4 +16,9 @@ Ouvrir l'adresse GitHub Pages dans Chrome, menu ⋮ puis « Ajouter à l'écran 
 
 Problèmes : en plus des épreuves faites main, une sélection de la [base de problèmes Lichess](https://database.lichess.org/#puzzles) (CC0, domaine public), importée par `tools/importer-lichess.js`.
 
+Moteur : [Stockfish.js](https://github.com/nmrugg/stockfish.js) 19 lite (GPL-3), basé sur [Stockfish](https://github.com/official-stockfish/Stockfish).
+
 Règles du jeu : [chess.js](https://github.com/jhlywa/chess.js) (BSD-2). Polices : Uncial Antiqua, Nunito, Noto Sans Symbols 2 (SIL OFL).
+
+## Licence
+GPL-3.0 (voir `LICENSE`). Le code source complet est dans ce dépôt ; celui de Stockfish.js est sur https://github.com/nmrugg/stockfish.js.
