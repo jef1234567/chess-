@@ -71,3 +71,15 @@ Plan validé par Jean-François le 2026-11-23 (« je veux tout faire ») ; style
 - ✅ Tout est coupé si l'appareil demande moins d'animations (vérifié : aucune animation ni particule).
 - ✅ Testé dans Chromium : 60 images par seconde pendant une prise avec confettis, processeur ralenti 4 fois ; mise en page du lot 7 inchangée ; tests des lots 2, 4 et 6 au vert.
 - ⏳ Essai sur la tablette.
+
+## Lot 9 — Gameplay ✅ (sauf essai sur tablette)
+- ✅ Indice gradué : 1er appui la pièce, 2e la case d'arrivée, 3e la solution. Étoiles par épreuve (3 sans indice, 2 avec un, 1 avec deux) ; XP de 10, 7 ou 5.
+- ✅ Quête du jour : 5 épreuves tirées chaque jour (thèmes variés, proches de la cote), puis un coffre (+20 XP et 1 XP par étoile).
+- ✅ Carte du royaume : 10 lieux (un par thème) ; un lieu est conquis après 5 épreuves réussies et ouvre le suivant. Toucher un lieu lance son thème.
+- ✅ Joute de 3 minutes : un maximum d'épreuves sans indice, record gardé, 2 XP par épreuve.
+- ✅ Tournoi : chaque niveau est un chevalier nommé avec blason et phrases (Tristan, Iseult, Perceval, le Baron Noir, le Duc d'Or).
+- ✅ Finales à gagner contre Stockfish à pleine force (dame, tour, deux tours, pion), vérifiées par `tools/verifier.js`.
+- ✅ Annuler un coup : 3 jokers par partie, contre le Page et l'Écuyer seulement.
+- ✅ 5 nouveaux hauts faits ; blason : étoiles, record de joute, lieux conquis. Sauvegarde migrée sans perte (testé avec une sauvegarde du lot 6).
+- ✅ Testé dans Chromium : quête complète jusqu'au coffre, carte, joute, jokers, finale gagnée et reprise après rechargement ; tests des lots précédents au vert.
+- ⏳ Essai sur la tablette avec l'enfant (réglage des 5 épreuves par lieu, durée de la joute).

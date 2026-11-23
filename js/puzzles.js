@@ -21,3 +21,12 @@ const P=[
 {id:"d2",t:"mat2",r:1050,fen:"7k/8/8/6K1/8/8/8/R7 w - - 0 1",line:["Kg6","Kg8","Ra8#"],x:"Le roi est aussi un guerrier : il s'approche pour garder les cases de fuite, puis la tour donne mat."},
 {id:"d3",t:"mat2",r:1100,fen:"k7/8/2K5/8/8/8/8/1R6 w - - 0 1",line:["Kc7","Ka7","Ra1#"],x:"Ton roi verrouille b7 et b8. Le roi noir n'a plus que a7, et la tour l'attend sur la colonne a."}
 ];
+
+/* Finales à gagner contre Stockfish (tournoi). Les blancs (le joueur) gagnent avec le bon plan ;
+   vérifiées par tools/verifier.js : position légale, trait aux blancs, roi noir seul. */
+const FINALES=[
+{k:"dame",nom:"Roi et dame contre roi",fen:"8/8/8/4k3/8/8/8/3QK3 w - - 0 1",x:"Avec ta dame, pousse le roi noir vers un bord. Approche ton roi, puis donne le mat. Attention au pat !"},
+{k:"tour",nom:"Roi et tour contre roi",fen:"8/8/8/4k3/8/8/8/R3K3 w - - 0 1",x:"La tour coupe le roi noir rangée par rangée. Ton roi doit venir l'aider."},
+{k:"tours",nom:"Deux tours contre roi",fen:"8/8/8/3k4/8/8/8/R3K2R w - - 0 1",x:"L'escalier : une tour coupe la route, l'autre donne échec, et on recommence jusqu'au bord."},
+{k:"pion",nom:"Roi et pion contre roi",fen:"4k3/8/4K3/4P3/8/8/8/8 w - - 0 1",x:"Ton roi marche devant ton pion pour lui ouvrir la route jusqu'à la promotion."}
+];
