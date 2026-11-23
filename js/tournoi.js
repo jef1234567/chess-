@@ -4,24 +4,30 @@
 /* ---------- Niveaux ----------
    skill : option « Skill Level » de Stockfish (0 à 20) ; depth/ms : profondeur ou temps de recherche ;
    hasard : part de coups joués au hasard, pour que les premiers niveaux restent battables.
-   Réglages de départ, à ajuster après les essais avec le joueur. */
+   Réglages issus de simulations (lot 12) : chaque niveau gagne environ 3 parties sur 4 contre le précédent,
+   au lieu de 9 sur 10 avant ; le Roi est le défi final. À ajuster après les essais avec le joueur. */
 /* Chaque niveau est un chevalier nommé (lot 9) : blason (fond, motif), phrase d'accueil, de victoire et de défaite. */
 const NIVEAUX=[
-  {k:"page",nom:"Le Page",skill:0,depth:1,hasard:.35,xp:20,chev:"Messire Tristan",bl:["#2f8f5b","#f3dc94"],
+  {k:"page",nom:"Le Page",skill:0,depth:1,hasard:.3,xp:20,chev:"Messire Tristan",bl:["#2f8f5b","#f3dc94"],
     salut:"Je suis Tristan, page du château. Je débute, comme toi… ou presque !",gagne:"Ha ! Même un page peut gagner. Revanche ?",perd:"Bien joué ! Tu as battu Tristan. L'Écuyer t'attend."},
   {k:"ecuyer",nom:"L'Écuyer",skill:1,depth:2,hasard:.2,xp:30,chev:"Dame Iseult",bl:["#24427f","#e3b84b"],
     salut:"Je suis Iseult, écuyère de la reine. Mes pièces sont bien entraînées.",gagne:"La reine sera fière de moi ! Reviens quand tu veux.",perd:"Quel duel ! Tu mérites de croiser le fer avec le Chevalier."},
-  {k:"chevalier",nom:"Le Chevalier",skill:4,depth:5,hasard:.08,xp:40,chev:"Sire Perceval",bl:["#b8343e","#f3dc94"],
+  {k:"chevalier",nom:"Le Chevalier",skill:2,depth:3,hasard:.12,xp:40,chev:"Sire Perceval",bl:["#b8343e","#f3dc94"],
     salut:"Je suis Perceval, chevalier de la Table ronde. En garde !",gagne:"Ma lame a été plus rapide aujourd'hui.",perd:"Je m'incline. Tu as l'âme d'un vrai chevalier !"},
-  {k:"baron",nom:"Le Baron",skill:9,depth:9,hasard:0,xp:60,chev:"Le Baron Noir",bl:["#1e1b2b","#b8343e"],
+  {k:"baron",nom:"Le Baron",skill:3,depth:4,hasard:.06,xp:50,chev:"Le Baron Noir",bl:["#1e1b2b","#b8343e"],
     salut:"On m'appelle le Baron Noir. Je ne fais jamais de cadeau.",gagne:"Hé hé… Le Baron Noir ne perd pas si facilement.",perd:"Impossible ! Personne ne bat le Baron Noir… sauf toi."},
-  {k:"duc",nom:"Le Duc",skill:16,ms:1000,hasard:0,xp:100,chev:"Le Duc d'Or",bl:["#a8772e","#fff4c4"],
-    salut:"Je suis le Duc d'Or, maître de ce tournoi. Prouve ta valeur !",gagne:"Le trône reste à moi. Entraîne-toi encore, jeune chevalier.",perd:"Tu as battu le Duc d'Or ! Tout le royaume chante ton nom !"},
+  {k:"comte",nom:"Le Comte",skill:5,depth:5,hasard:.02,xp:60,chev:"Sire Gauvain",bl:["#5b3a8c","#e3b84b"],
+    salut:"Je suis Gauvain, comte et neveu du roi. Mon épée ne recule jamais.",gagne:"Gauvain garde son honneur aujourd'hui !",perd:"Je salue ta victoire, tu joues comme un comte !"},
+  {k:"duc",nom:"Le Duc",skill:7,depth:7,hasard:0,xp:80,chev:"Le Duc d'Or",bl:["#a8772e","#fff4c4"],
+    salut:"Je suis le Duc d'Or. Seul le roi est plus fort que moi. Prouve ta valeur !",gagne:"Le trône reste à moi. Entraîne-toi encore, jeune chevalier.",perd:"Tu as battu le Duc d'Or ! Tout le royaume chante ton nom !"},
+  {k:"roi",nom:"Le Roi",skill:10,depth:10,hasard:0,xp:120,chev:"Le Roi Arthur",bl:["#7a1420","#f3dc94"],
+    salut:"Je suis Arthur, roi de ce royaume. Seuls les plus grands me battent.",gagne:"Le royaume garde son roi. Tu deviens redoutable !",perd:"Tu as vaincu le Roi Arthur ! Ton nom entre dans la légende !"},
 ];
 // Finales à gagner (FINALES dans puzzles.js) : Stockfish défend à pleine force.
 const GARDIEN={k:"finale",nom:"Le Gardien",skill:20,ms:400,hasard:0,xp:25,chev:"Le Gardien des finales",bl:["#4d566e","#dfe6f5"]};
 function nivDe(k){
   if(typeof k==="string"&&k.startsWith("finale:")){const f=FINALES.find(x=>x.k===k.slice(7));if(f)return Object.assign({},GARDIEN,{k,finale:f});}
+  if(k==="duel")return {k:"duel",nom:"Duel",chev:"ton adversaire du duel",bl:["#24427f","#f3dc94"],xp:0};
   return NIVEAUX.find(n=>n.k===k)||NIVEAUX[0];
 }
 function portrait(n){const[f,m]=n.bl;

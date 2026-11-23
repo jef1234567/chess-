@@ -44,7 +44,7 @@
   <section id="vTournoi" class="tournoi" hidden>
     <div class="carte" id="tChoix">
       <h3>Le tournoi</h3>
-      <p class="note">Choisis ton adversaire. Le Page est le plus facile, le Duc le plus redoutable.</p>
+      <p class="note">Choisis ton adversaire. Le Page est le plus facile, le Roi le plus redoutable.</p>
       <div class="chips wrap" id="tNiveaux" role="group" aria-label="Adversaire"></div>
       <div class="duel" id="tDuel"></div>
       <p class="note">Avec quelles pièces veux-tu jouer ?</p>
@@ -87,6 +87,45 @@
     </div>
   </section>
 
+  <section id="vDuel" class="tournoi" hidden>
+    <div class="carte dCarte" id="dAccueil">
+      <h3>Duel à distance</h3>
+      <p class="note">Joue contre un ami ou un parent sur un autre téléphone. Il faut Internet sur les deux appareils.</p>
+      <p class="note">Avec quelles pièces veux-tu jouer ?</p>
+      <div class="chips wrap" id="dCamps" role="group" aria-label="Couleur"></div>
+      <button id="dCreer" class="or" type="button">Créer un duel</button>
+      <h3 class="sep">Rejoindre un duel</h3>
+      <p class="note">Tape le code que ton adversaire t'a envoyé.</p>
+      <input id="dCode" maxlength="16" placeholder="ABCD-EFGH-JKMN" autocomplete="off" autocapitalize="characters" spellcheck="false">
+      <div class="actions" style="margin-top:10px"><button id="dRejoindre" class="or" type="button">Rejoindre</button></div>
+      <p class="note" id="dErreur"></p>
+      <p class="note">Seuls les coups et ton nom de chevalier sont envoyés, chiffrés : personne d'autre ne peut les lire. Ils passent par le relais gratuit ntfy.sh et sont effacés au bout de 12 heures.</p>
+    </div>
+    <div class="carte dCarte" id="dAttente" hidden>
+      <h3>Ton duel est prêt</h3>
+      <p class="note">Envoie ce code (ou le lien) à ton adversaire :</p>
+      <div class="dCodeGrand" id="dCodeTxt">—</div>
+      <div class="actions"><button id="dPartager" class="or" type="button">Envoyer le lien</button><button id="dCopier" type="button">Copier</button></div>
+      <p class="note" id="dEtatInv">En attente de ton adversaire…</p>
+      <div class="actions"><button id="dJouerDeja" type="button">Aller à l'échiquier</button><button id="dAnnulerInv" type="button">Annuler le duel</button></div>
+    </div>
+    <div id="dJeu" class="tjeu jeu" hidden>
+      <div class="mission">
+        <div class="trait w" id="dTrait" aria-hidden="true"></div>
+        <div><h2 id="dTitre">Duel à distance</h2><p id="dTexte">…</p></div>
+        <div class="theme-tag" id="dLien">—</div>
+      </div>
+      <div id="dSlot" class="slot"></div>
+      <div class="parchemin" id="dParch"><p>…</p></div>
+      <div class="actions">
+        <button id="dRevanche" class="or" type="button" hidden>Revanche</button>
+        <button id="dAbandon" type="button">Abandonner</button>
+        <button id="dCodeB" type="button">Code</button>
+        <button id="dQuitter" type="button">Quitter</button>
+      </div>
+    </div>
+  </section>
+
   <section id="vBlason" class="blason" hidden>
     <div class="carte grade">
       <svg class="ecu" viewBox="0 0 40 48" aria-hidden="true"><path d="M3 3h34v18c0 13-9 21-17 24C12 42 3 34 3 21z" fill="#b8343e" stroke="#e3b84b" stroke-width="2.5"/><path d="M20 9v30M9 20h22" stroke="#e3b84b" stroke-width="4"/></svg>
@@ -122,6 +161,7 @@
 <nav>
   <button id="tSalle" type="button" aria-current="true">Salle d'armes</button>
   <button id="tTournoiB" type="button" aria-current="false">Tournoi</button>
+  <button id="tDuelB" type="button" aria-current="false">Duel</button>
   <button id="tBlason" type="button" aria-current="false">Mon blason</button>
 </nav>
 
@@ -136,6 +176,7 @@
 <script src="js/connecte.js"></script>
 <script src="js/recompenses.js"></script>
 <script src="js/quetes.js"></script>
+<script src="js/duel.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

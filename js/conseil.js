@@ -19,7 +19,7 @@ async function conseilOuvrir(n){
   S.conseils=(S.conseils||0)+1;save();hautsVerifier();
   $("tChoix").hidden=true;$("tJeu").hidden=true;$("cJeu").hidden=false;$("cSlot").appendChild($("plateau"));
   ["cPrec","cSuiv","cMontrer"].forEach(id=>$(id).disabled=true);$("cExplique").hidden=true;
-  $("cTexte").textContent=`Ta partie contre ${nivDe(p.niv).chev}`;$("cNum").textContent="…";
+  $("cTexte").textContent=`Ta partie contre ${p.niv==="duel"?(p.adv||"ton adversaire"):nivDe(p.niv).chev}`;$("cNum").textContent="…";
   // position finale pendant l'analyse
   const g=p.fen?new Chess(p.fen):new Chess();for(const c of p.coups)g.move(c);G=g;flip=p.camp==="b";draw();clearArrows();
   const cles=C.cache[p.d]||await cAnalyser(p,jeton);
