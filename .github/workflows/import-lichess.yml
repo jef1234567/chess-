@@ -1,0 +1,42 @@
+name: Import Lichess
+# Télécharge la base libre de problèmes Lichess (CC0), sélectionne et vérifie les problèmes,
+# puis enregistre js/lichess.js sur la branche. Se lance à la main (onglet Actions)
+# ou quand l'importeur change sur une branche de lot.
+on:
+  workflow_dispatch:
+  push:
+    branches: ["lot-*"]
+    paths:
+      - tools/importer-lichess.js
+      - tools/verif-lib.js
+      - .github/workflows/import-lichess.yml
+permissions:
+  contents: write
+concurrency:
+  group: import-lichess-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  importer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Télécharger, filtrer et vérifier
+        run: |
+          curl -sSfL https://database.lichess.org/lichess_db_puzzle.csv.zst -o puzzles.csv.zst
+          ls -lh puzzles.csv.zst
+          zstd -dc puzzles.csv.zst | node tools/importer-lichess.js
+          rm puzzles.csv.zst
+      - name: Vérification complète
+        run: node tools/verifier.js && node tools/verifier-cache.js
+      - name: Enregistrer js/lichess.js sur la branche
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add js/lichess.js
+          if git diff --cached --quiet; then echo "Aucun changement."; exit 0; fi
+          git commit -m "Import Lichess : js/lichess.js régénéré"
+          git push

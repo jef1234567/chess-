@@ -2,8 +2,17 @@
 const GRADES=[[0,"Page"],[50,"Écuyer"],[150,"Chevalier"],[300,"Chevalier banneret"],[500,"Baron"],[800,"Comte"],[1200,"Duc"]];
 
 /* ---------- Sauvegarde (sur cet appareil) ---------- */
-const DEF={nom:"",xp:0,cote:600,serie:0,best:0,reussi:0,th:{},hist:[],vus:[],son:true};
-let S=Object.assign({},DEF);
-try{const raw=localStorage.getItem("salle-armes-v1");if(raw)S=Object.assign({},DEF,JSON.parse(raw));}catch(e){}
+// Format v1 (lot 0) : nom, xp, cote, serie, best, reussi, th, hist, vus, son.
+// Ajouts du lot 2 : aRevoir (épreuves ratées à revoir), reussis (épreuves déjà réussies).
+// Les anciennes données sont gardées telles quelles ; les champs absents prennent leur valeur par défaut.
+function defauts(){return {nom:"",xp:0,cote:600,serie:0,best:0,reussi:0,th:{},hist:[],vus:[],son:true,aRevoir:[],reussis:[]};}
+function migrer(o){
+  const d=defauts(),s=Object.assign(d,o&&typeof o==="object"?o:{});
+  for(const k of ["hist","vus","aRevoir","reussis"])if(!Array.isArray(s[k]))s[k]=[];
+  if(!s.th||typeof s.th!=="object")s.th={};
+  return s;
+}
+let S=defauts();
+try{const raw=localStorage.getItem("salle-armes-v1");if(raw)S=migrer(JSON.parse(raw));}catch(e){}
 function save(){try{localStorage.setItem("salle-armes-v1",JSON.stringify(S));}catch(e){}}
 function gradeDe(xp){let g=GRADES[0],n=null;for(let i=0;i<GRADES.length;i++){if(xp>=GRADES[i][0]){g=GRADES[i];n=GRADES[i+1]||null;}}return[g,n];}

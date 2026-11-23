@@ -1,5 +1,5 @@
 /* Épreuves : thèmes et problèmes. Chaque problème est vérifié par tools/verifier.js. */
-const THEMES={mat1:"Mat en 1",mat2:"Mat en 2",fourchette:"Fourchette",prise:"Pièce gratuite",enfilade:"Enfilade",clouage:"Clouage"};
+const THEMES={mat1:"Mat en 1",mat2:"Mat en 2",fourchette:"Fourchette",prise:"Pièce gratuite",enfilade:"Enfilade",clouage:"Clouage",attaqueDouble:"Attaque double",decouverte:"Découverte",defense:"Défense",finale:"Finale"};
 const P=[
 {id:"m1",t:"mat1",r:500,fen:"6k1/5ppp/8/8/8/8/5PPP/3R2K1 w - - 0 1",line:["Rd8#"],x:"La tour donne échec sur la dernière rangée et les pions noirs bouchent la sortie du roi : c'est le mat du couloir."},
 {id:"m2",t:"mat1",r:450,fen:"k7/8/1K6/8/8/8/7Q/8 w - - 0 1",line:["Qh8#"],x:"Ton roi garde les cases a7, b7 et c7. La dame n'a plus qu'à donner échec sur la 8e rangée."},
