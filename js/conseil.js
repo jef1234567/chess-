@@ -17,7 +17,7 @@ async function conseilOuvrir(n){
   T.jeton++;MOTEUR.stop(); // une partie en cours attend pendant le conseil
   C.partie=p;C.cles=[];C.i=0;C.montre=false;const jeton=++C.jeton;
   $("tChoix").hidden=true;$("tJeu").hidden=true;$("cJeu").hidden=false;$("cSlot").appendChild($("plateau"));
-  ["cPrec","cSuiv","cMontrer"].forEach(id=>$(id).disabled=true);
+  ["cPrec","cSuiv","cMontrer"].forEach(id=>$(id).disabled=true);$("cExplique").hidden=true;
   $("cTexte").textContent=`Ta partie contre ${(NIVEAUX.find(x=>x.k===p.niv)||NIVEAUX[0]).nom}`;$("cNum").textContent="…";
   // position finale pendant l'analyse
   const g=new Chess();for(const c of p.coups)g.move(c);G=g;flip=p.camp==="b";draw();clearArrows();
@@ -80,6 +80,7 @@ function cAfficher(){
   cMsg(`<span class="ko">Flèche rouge : ton coup.</span> <span class="ok">Flèche verte : le meilleur.</span><br>${cPhrase(k)}`);
   $("cPrec").disabled=C.i===0;$("cSuiv").disabled=C.i>=C.cles.length-1;$("cMontrer").disabled=!best;
   $("cMontrer").textContent="Montre le bon coup";
+  iaBouton("cExplique","cParch",()=>iaQuestionConseil(k));
 }
 function cQuitter(){ // ferme le conseil sans toucher à l'échiquier (changement d'onglet)
   C.jeton++;MOTEUR.stop();$("cJeu").hidden=true;

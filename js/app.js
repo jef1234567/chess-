@@ -56,7 +56,7 @@ function charger(p){
   const blanc=camp==="w";
   $("trait").className="trait "+(blanc?"w":"b");
   $("mTitre").textContent=(blanc?"Les blancs":"Les noirs")+" jouent";$("mTexte").textContent=BUT[p.t]||"";$("mTheme").textContent=THEMES[p.t];
-  $("sceau").className="sceau";
+  $("sceau").className="sceau";$("bExplique").hidden=true;
   $("bIndice").disabled=!!p.a;$("bSolution").disabled=!!p.a;
   if(p.a){
     $("parch").innerHTML=`<p>Tu joues les <b>${blanc?"blancs":"noirs"}</b>. Regarde bien le coup de l'adversaire…</p>`;
@@ -111,6 +111,7 @@ function echec(m){
   bilan(false,0);
   $("parch").innerHTML=`<p><span class="ko">Ce coup (${m.san}) ne marche pas.</span> Regarde la flèche verte : c'est le bon coup.<br>${PZ.x}</p>`;
   $("bIndice").disabled=true;$("bSolution").disabled=true;
+  iaBouton("bExplique","parch",()=>iaQuestionEpreuve(m.san));
 }
 function montrerSolution(rejouer){
   const g=new Chess(G.fen());const mv=g.move(PZ.line[step_]);if(!mv)return;
@@ -137,6 +138,7 @@ function majEntete(){
   $("salut").textContent=S.nom.trim()?`En garde, ${S.nom.trim()} !`:"Entraîne-toi, jeune écuyer";
 }
 function majBlason(){
+  iaMajReglages();
   const[g,n]=gradeDe(S.xp);
   $("gGrade").textContent=g[1];$("gProchain").textContent=n?`Encore ${n[0]-S.xp} XP pour devenir ${n[1]}`:"Grade le plus haut atteint !";
   $("nom").value=S.nom;$("sReussi").textContent=S.reussi;$("sSerie").textContent=S.best;$("sCote").textContent=S.cote;
@@ -158,7 +160,7 @@ $("bSuivant").onclick=()=>{ac();charger(choisir());};
 $("bIndice").onclick=()=>{if(etat!=="jeu")return;indice++;const g=new Chess(G.fen());const mv=g.move(PZ.line[step_]);
   if(indice===1){clearMarks();sqEl(mv.from).classList.add("hint");$("parch").innerHTML=`<p>Indice : la pièce qui brille est celle à jouer.</p>`;}
   else{clearArrows();arrow(mv.from,mv.to);$("parch").innerHTML=`<p>Dernier indice : suis la flèche !</p>`;$("bIndice").disabled=true;}};
-$("bSolution").onclick=()=>{if(etat!=="jeu")return;indice=2;bilan(false,0);$("parch").innerHTML=`<p><span class="ko">Voici la solution.</span><br>${PZ.x}</p>`;montrerSolution(true);$("bIndice").disabled=true;$("bSolution").disabled=true;};
+$("bSolution").onclick=()=>{if(etat!=="jeu")return;indice=2;bilan(false,0);$("parch").innerHTML=`<p><span class="ko">Voici la solution.</span><br>${PZ.x}</p>`;montrerSolution(true);$("bIndice").disabled=true;$("bSolution").disabled=true;iaBouton("bExplique","parch",()=>iaQuestionEpreuve(null));};
 $("bSon").onclick=()=>{S.son=!S.son;save();$("bSon").textContent="Son : "+(S.son?"oui":"non");$("bSon").setAttribute("aria-pressed",S.son);};
 $("bSon").textContent="Son : "+(S.son?"oui":"non");
 $("nom").addEventListener("input",e=>{S.nom=e.target.value;save();majEntete();});

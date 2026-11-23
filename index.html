@@ -37,6 +37,7 @@
       <button id="bSolution" type="button">Solution</button>
       <button id="bSuivant" class="or" type="button">Épreuve suivante</button>
       <button id="bSon" type="button" aria-pressed="true" title="Son">Son : oui</button>
+      <button id="bExplique" type="button" hidden>Explique-moi</button>
     </div>
   </section>
 
@@ -75,6 +76,7 @@
         <button id="cPrec" type="button">Précédent</button>
         <button id="cMontrer" type="button">Montre le bon coup</button>
         <button id="cSuiv" type="button">Suivant</button>
+        <button id="cExplique" type="button" hidden>Explique-moi</button>
         <button id="cFermer" class="or" type="button">Retour au tournoi</button>
       </div>
     </div>
@@ -96,6 +98,13 @@
     <div class="carte"><h3>Tournoi</h3><div id="tBilan"></div></div>
     <div class="carte"><h3>Mes parties</h3><div class="hist" id="parties"></div></div>
     <div class="carte"><h3>Dernières épreuves</h3><div class="hist" id="hist"></div></div>
+    <div class="carte"><h3>Mode connecté</h3>
+      <p class="note">Facultatif, pour les parents. Avec une clé d'API Claude, le bouton « Explique-moi » demande au maître d'armes d'expliquer une épreuve ratée ou un coup du conseil de guerre. Il faut Internet, et chaque explication coûte environ 1 centime sur le compte de la clé.</p>
+      <label for="iaCle">Clé d'API</label>
+      <input id="iaCle" type="password" autocomplete="off" placeholder="sk-ant-…">
+      <div class="actions" style="margin-top:10px"><button id="iaGarder" type="button">Enregistrer</button><button id="iaOublier" type="button" hidden>Oublier la clé</button></div>
+      <p class="note" id="iaEtat"></p>
+    </div>
     <p class="note">La progression est gardée sur cet appareil uniquement.</p>
   </section>
 </div>
@@ -113,6 +122,7 @@
 <script src="js/board.js"></script>
 <script src="js/tournoi.js"></script>
 <script src="js/conseil.js"></script>
+<script src="js/connecte.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
