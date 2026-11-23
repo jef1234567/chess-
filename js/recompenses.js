@@ -65,3 +65,37 @@ $("vBlason").addEventListener("click",e=>{
   save();majApparence();
 });
 appliquerPlateau();
+
+/* ---------- Fêtes : sceau de cire, XP qui vole, adoubement ---------- */
+function sceau(txt,rate,ms=1400){
+  const s=$("sceau");$("sceauTxt").textContent=txt;s.className="sceau";void s.offsetWidth;
+  s.className="sceau on"+(rate?" rate":"");clearTimeout(s._t);s._t=setTimeout(()=>s.className="sceau",ms);
+}
+function xpVole(n){
+  if(!n)return;const bar=$("xpBar");
+  if(REDUIT()||!document.body.animate)return;
+  const d=document.createElement("div");d.className="xpvol";d.textContent=`+${n} XP`;document.body.appendChild(d);
+  const[x,y]=centre($("board")),[x2,y2]=centre(bar);d.style.left=x+"px";d.style.top=y+"px";
+  d.animate([{transform:"translate(-50%,-50%) scale(.5)",opacity:0},{transform:"translate(-50%,-50%) scale(1.25)",opacity:1,offset:.3},
+    {transform:`translate(calc(-50% + ${x2-x}px),calc(-50% + ${y2-y}px)) scale(.45)`,opacity:.8}],{duration:1150,delay:500,easing:"cubic-bezier(.55,0,.35,1)",fill:"backwards"})
+   .onfinish=()=>{d.remove();bar.parentElement.animate([{boxShadow:"0 0 0 0 #f3dc9400"},{boxShadow:"0 0 14px 5px #f3dc94"},{boxShadow:"0 0 0 0 #f3dc9400"}],{duration:600});};
+}
+// Toute l'XP passe par ici : une montée de grade déclenche l'adoubement.
+function gagnerXP(n){
+  const avant=gradeDe(S.xp)[0][1];S.xp+=n;const apres=gradeDe(S.xp)[0][1];
+  xpVole(n);if(apres!==avant)setTimeout(()=>adouber(apres),2200);
+}
+function adouber(grade){
+  let a=$("adoube");
+  if(!a){a=document.createElement("div");a.id="adoube";a.className="adoube";a.setAttribute("role","dialog");a.setAttribute("aria-label","Nouveau grade");document.body.appendChild(a);
+    a.onclick=()=>{a.classList.remove("on");};}
+  a.innerHTML=`<div class="scene">
+    <svg class="ecu-ad" viewBox="0 0 40 48" aria-hidden="true"><path d="M3 3h34v18c0 13-9 21-17 24C12 42 3 34 3 21z" fill="#24427f" stroke="#e3b84b" stroke-width="2"/><path d="M20 10l3 6h6l-5 4 2 7-6-4-6 4 2-7-5-4h6z" fill="#e3b84b"/></svg>
+    <svg class="epee" viewBox="0 0 40 200" aria-hidden="true"><defs><linearGradient id="lame" x1="0" x2="1"><stop offset="0" stop-color="#9aa6c0"/><stop offset=".5" stop-color="#f4f7ff"/><stop offset="1" stop-color="#8590aa"/></linearGradient></defs>
+      <path d="M16 46h8v128l-4 14-4-14z" fill="url(#lame)"/><rect x="2" y="38" width="36" height="8" rx="4" fill="#e3b84b"/><rect x="16" y="8" width="8" height="30" rx="3" fill="#6b3f1f"/><circle cx="20" cy="7" r="6" fill="#e3b84b"/></svg>
+  </div>
+  <p class="voix">Par cette épée, ${esc(nomOuEcuyer())}, je te fais</p><h2>${esc(grade)}</h2><p class="note">Touche l'écran pour continuer</p>`;
+  a.classList.remove("on");void a.offsetWidth;a.classList.add("on");
+  SON.adoube();setTimeout(()=>confettis(180),1100);
+  clearTimeout(a._t);a._t=setTimeout(()=>a.classList.remove("on"),7000);
+}

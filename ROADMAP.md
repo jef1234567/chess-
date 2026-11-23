@@ -58,5 +58,16 @@ Légende : ✅ fait · 🔄 en cours · ⏳ à faire
 - ✅ Testé dans Chromium : tablette 800×1280 et 1280×800 (avec et sans barre de Chrome), téléphone 360×660 et 740×330 ; aucun défilement, échiquier de 745 px en portrait tablette.
 - ⏳ Essai sur la tablette.
 
-## Lots suivants — à valider
-Plan proposé à Jean-François le 2026-11-23 (graphisme et animations, puis gameplay ; API plus tard). Lots 8 et 9 à préciser après sa validation.
+## Lot 8 — Graphisme et animations ✅ (sauf essai sur tablette)
+Plan validé par Jean-François le 2026-11-23 (« je veux tout faire ») ; style « livre illustré » choisi par Claude, modifiable.
+- ✅ Décor : mur de pierre éclairé par des torches, échiquier en bois sculpté avec filet doré, cases légèrement texturées.
+- ✅ Coups : la pièce se lève, file en arc, se pose avec un rebond et un nuage de poussière ; le roque fait glisser la tour.
+- ✅ Prise : la pièce prise éclate en éclats et étincelles, l'échiquier encaisse le choc.
+- ✅ Échec : lueur rouge qui pulse sous le roi menacé. Mat : le roi vaincu bascule ; confettis aux couleurs du blason pour une victoire.
+- ✅ Réussite : sceau de cire qui s'imprime, XP qui vole vers la barre. Montée de grade : écran d'adoubement (épée, nouveau titre en lettres d'or, grand cor).
+- ✅ Indice : la case scintille ; flèches tracées progressivement.
+- ✅ Sons plus riches, toujours synthétisés : bois posé, choc d'épées, trompette d'échec, cor de victoire.
+- ✅ Vrai plein écran : appli installée en plein écran (manifeste), et dans Chrome au premier toucher ; réglage « Plein écran » dans le blason.
+- ✅ Tout est coupé si l'appareil demande moins d'animations (vérifié : aucune animation ni particule).
+- ✅ Testé dans Chromium : 60 images par seconde pendant une prise avec confettis, processeur ralenti 4 fois ; mise en page du lot 7 inchangée ; tests des lots 2, 4 et 6 au vert.
+- ⏳ Essai sur la tablette.

@@ -95,10 +95,10 @@ function nomOuEcuyer(){return S.nom.trim()||"jeune écuyer";}
 function reussite(){
   etat="fini";const gain=indice?5:10;
   setTimeout(()=>{
-    SON.victoire();burstAt($("board"),70,["#e3b84b","#f3dc94","#2f8f5b","#ffffff","#b8343e"]);
-    $("sceauTxt").textContent=["Bravo !","Touché !","Superbe !","Victoire !"][Math.floor(Math.random()*4)];$("sceau").className="sceau on";
-    setTimeout(()=>$("sceau").className="sceau",1300);
-  },320);
+    SON.victoire();burstAt($("board"),50,["#e3b84b","#f3dc94","#2f8f5b","#ffffff","#b8343e"]);
+    if(G.in_checkmate())confettis();
+    sceau(["Bravo !","Touché !","Superbe !","Victoire !"][Math.floor(Math.random()*4)]);
+  },420);
   bilan(true,gain);
   $("parch").innerHTML=`<p><span class="ok">Bien joué, ${esc(nomOuEcuyer())} ! +${gain} XP</span><br>${PZ.x}</p>`;
   $("bIndice").disabled=true;$("bSolution").disabled=true;
@@ -106,7 +106,7 @@ function reussite(){
 function echec(m){
   etat="fini";SON.rate();
   setTimeout(()=>{B.classList.add("shake");setTimeout(()=>B.classList.remove("shake"),420);
-    $("sceauTxt").textContent="Pas cette fois";$("sceau").className="sceau on rate";setTimeout(()=>$("sceau").className="sceau",1100);},300);
+    sceau("Pas cette fois",true,1200);},300);
   plus(()=>{G=new Chess(PZ.fen);for(let i=0;i<step_;i++)G.move(PZ.line[i]);draw();montrerSolution(false);},1200);
   bilan(false,0);
   $("parch").innerHTML=`<p><span class="ko">Ce coup (${m.san}) ne marche pas.</span> Regarde la flèche verte : c'est le bon coup.<br>${PZ.x}</p>`;
@@ -121,7 +121,7 @@ function montrerSolution(rejouer){
 function bilan(ok,gain){
   const exp=1/(1+Math.pow(10,(PZ.r-S.cote)/400));const score=ok?(indice?.6:1):0;
   S.cote=Math.round(Math.max(200,S.cote+32*(score-exp)));
-  S.xp+=gain;if(ok){S.reussi++;S.serie++;S.best=Math.max(S.best,S.serie);}else S.serie=0;
+  gagnerXP(gain);if(ok){S.reussi++;S.serie++;S.best=Math.max(S.best,S.serie);}else S.serie=0;
   const t=S.th[PZ.t]||{ok:0,n:0};t.n++;if(ok)t.ok++;S.th[PZ.t]=t;
   S.vus.push(PZ.id);S.vus=S.vus.slice(-30);
   // révision : une épreuve ratée revient plus tard ; réussie (sans solution), elle sort de la liste
@@ -190,6 +190,20 @@ $("tSalle").onclick=()=>onglet("salle");$("tTournoiB").onclick=()=>onglet("tourn
 const ch=$("chips");ch.dataset.f="tous";
 ch.innerHTML=[["tous","Toutes les bottes"],...Object.entries(THEMES)].map(([k,v])=>`<button type="button" class="chip${k==="tous"?" on":""}" data-k="${k}">${v}</button>`).join("");
 ch.onclick=e=>{const b=e.target.closest(".chip");if(!b)return;ch.dataset.f=b.dataset.k;ch.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c===b));charger(choisir());};
+/* Vrai plein écran (barre de Chrome masquée) au premier toucher de chaque visite, sauf si l'appli installée l'est déjà. */
+let pleinTente=false;
+function pleinEcran(){
+  if(pleinTente||!S.pleinEcran)return;pleinTente=true;
+  const d=document.documentElement;
+  if(document.fullscreenElement||matchMedia("(display-mode: fullscreen)").matches||!d.requestFullscreen)return;
+  d.requestFullscreen({navigationUI:"hide"}).catch(()=>{});
+}
+addEventListener("pointerdown",pleinEcran,{passive:true});
+function majPlein(){$("apPlein").classList.toggle("on",!!S.pleinEcran);$("apPlein").setAttribute("aria-pressed",!!S.pleinEcran);$("apPlein").textContent="Plein écran : "+(S.pleinEcran?"oui":"non");}
+$("apPlein").onclick=()=>{S.pleinEcran=!S.pleinEcran;save();majPlein();
+  if(!S.pleinEcran&&document.fullscreenElement)document.exitFullscreen().catch(()=>{});
+  else if(S.pleinEcran){pleinTente=false;pleinEcran();}};
+majPlein();
 majEntete();charger(choisir());
 if(tReprendre()){tMsg(`Ta partie contre <b>${T.niv.nom}</b> t'attend. À toi de jouer !`);}
 if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}

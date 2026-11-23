@@ -7,8 +7,9 @@ const GRADES=[[0,"Page"],[50,"Écuyer"],[150,"Chevalier"],[300,"Chevalier banner
 // Ajout du lot 3 : tournoi {partie en cours, bilan par niveau}.
 // Ajout du lot 4 : parties (les 20 dernières parties du tournoi, pour le conseil de guerre).
 // Ajout du lot 6 : pieces (jeu de pièces), plateau (couleurs), hauts (hauts faits débloqués), conseils (nombre de conseils ouverts).
+// Ajout du lot 8 : pleinEcran (passer en plein écran au premier toucher).
 // Les anciennes données sont gardées telles quelles ; les champs absents prennent leur valeur par défaut.
-function defauts(){return {nom:"",xp:0,cote:600,serie:0,best:0,reussi:0,th:{},hist:[],vus:[],son:true,aRevoir:[],reussis:[],tournoi:{partie:null,bilan:{}},parties:[],pieces:"fantasy",plateau:"nuit",hauts:[],conseils:0};}
+function defauts(){return {nom:"",xp:0,cote:600,serie:0,best:0,reussi:0,th:{},hist:[],vus:[],son:true,aRevoir:[],reussis:[],tournoi:{partie:null,bilan:{}},parties:[],pieces:"fantasy",plateau:"nuit",hauts:[],conseils:0,pleinEcran:true};}
 function migrer(o){
   const d=defauts(),s=Object.assign(d,o&&typeof o==="object"?o:{});
   for(const k of ["hist","vus","aRevoir","reussis","parties","hauts"])if(!Array.isArray(s[k]))s[k]=[];
