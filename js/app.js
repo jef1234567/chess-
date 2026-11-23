@@ -66,12 +66,12 @@ function charger(p){
   } else $("parch").innerHTML=`<p>Tu joues les <b>${blanc?"blancs":"noirs"}</b>. Touche une pièce, puis la case où tu veux la jouer.</p>`;
 }
 function tap(sq){
-  const tournoi=mode==="tournoi";
-  if(tournoi?!tPeutJouer():etat!=="jeu")return;
+  const conseil=mode==="tournoi"&&!$("cJeu").hidden,tournoi=mode==="tournoi"&&!conseil;
+  if(conseil?!cPeutJouer():tournoi?!tPeutJouer():(etat!=="jeu"&&etat!=="corrige"))return;
   const p=G.get(sq);
   if(sel&&sel!==sq){
     const mv=G.moves({square:sel,verbose:true}).find(m=>m.to===sq);
-    if(mv){(tournoi?tJouer:jouer)(mv);return;}
+    if(mv){(conseil?cJouer:tournoi?tJouer:jouer)(mv);return;}
   }
   clearMarks();
   if(p&&p.color===G.turn()&&sel!==sq){
@@ -80,6 +80,7 @@ function tap(sq){
   } else sel=null;
 }
 function jouer(vm){
+  if(etat==="corrige"){jouerCorrection(vm);return;}
   clearMarks();sel=null;
   const san=G.move({from:vm.from,to:vm.to,promotion:"q"}).san;G.undo();
   const ok=accepte(san);
@@ -110,17 +111,34 @@ function echec(m){
   etat="fini";SON.rate();
   setTimeout(()=>{B.classList.add("shake");setTimeout(()=>B.classList.remove("shake"),420);
     sceau("Pas cette fois",true,1200);},300);
-  plus(()=>{G=new Chess(PZ.fen);for(let i=0;i<step_;i++)G.move(PZ.line[i]);draw();montrerSolution(false);},1200);
+  plus(()=>{G=new Chess(PZ.fen);for(let i=0;i<step_;i++)G.move(PZ.line[i]);draw();corriger();},1200);
   bilan(false,0);
-  $("parch").innerHTML=`<p><span class="ko">Ce coup (${m.san}) ne marche pas.</span> Regarde la flèche verte : c'est le bon coup.<br>${PZ.x}</p>`;
+  $("parch").innerHTML=`<p><span class="ko">Ce coup (${m.san}) ne marche pas.</span>${J.actif?"":" La flèche verte montre le bon coup. <b>À toi de le jouer</b> pour voir ce qui se passe !"}</p>`;
   $("bIndice").disabled=true;$("bSolution").disabled=true;
   iaBouton("bExplique","parch",()=>iaQuestionEpreuve(m.san));
   finEpreuve(false);
 }
-function montrerSolution(rejouer){
-  const g=new Chess(G.fen());const mv=g.move(PZ.line[step_]);if(!mv)return;
-  clearArrows();arrow(mv.from,mv.to);sqEl(mv.from).classList.add("hint");
-  if(rejouer){etat="fini";const suite=()=>{const c=PZ.line[step_];if(!c)return;const m=G.move(c);if(!m)return;animMove(m);step_++;plus(suite,700);};plus(suite,700);}
+/* Correction : après une erreur ou la solution, l'enfant joue lui-même le coup de la flèche verte,
+   puis voit la réponse adverse et la suite, coup par coup, jusqu'à la fin de la ligne. */
+function corriger(){
+  if(J.actif)return;
+  const g=new Chess(G.fen());const mv=g.move(PZ.line[step_]);if(!mv){etat="fini";return;}
+  clearArrows();clearMarks();sel=null;arrow(mv.from,mv.to);sqEl(mv.from).classList.add("hint");
+  etat="corrige";
+}
+function jouerCorrection(vm){
+  clearMarks();sel=null;
+  const bon=new Chess(G.fen()).move(PZ.line[step_]);
+  if(!bon||vm.from!==bon.from||vm.to!==bon.to){
+    $("parch").innerHTML=`<p>Pas celui-là. Joue la pièce qui brille, en suivant la flèche verte !</p>`;
+    B.classList.add("shake");setTimeout(()=>B.classList.remove("shake"),420);if(bon)sqEl(bon.from).classList.add("hint");return;}
+  clearArrows();const m=G.move(PZ.line[step_]);animMove(m);step_++;etat="suite";
+  const fin=r=>{etat="fini";plus(()=>{$("parch").innerHTML=`<p><span class="ok">Voilà ce qu'il fallait jouer : ${m.san} !</span>${r?` L'adversaire a répondu ${r.san}.`:""}<br>${PZ.x}</p>`;},600);};
+  if(step_>=PZ.line.length||G.game_over()){fin(null);return;}
+  $("parch").innerHTML=`<p>Bien ! Regarde maintenant ce que fait l'adversaire…</p>`;
+  plus(()=>{const r=G.move(PZ.line[step_]);if(!r){fin(null);return;}animMove(r);step_++;
+    if(step_>=PZ.line.length||G.game_over()){fin(r);return;}
+    $("parch").innerHTML=`<p>L'adversaire répond <b>${r.san}</b>. Continue : joue le coup de la nouvelle flèche verte.</p>`;corriger();},900);
 }
 function bilan(ok,gain){
   const exp=1/(1+Math.pow(10,(PZ.r-S.cote)/400));const score=ok?(indice?.6:1):0;
@@ -167,7 +185,7 @@ $("bIndice").onclick=()=>{if(etat!=="jeu")return;const g=new Chess(G.fen());cons
   indice++;clearMarks();sel=null;sqEl(mv.from).classList.add("hint");
   if(indice===1){$("parch").innerHTML=`<p>Indice 1 : la pièce qui brille est celle à jouer. ${etoilesHTML(2)}</p>`;$("bIndice").textContent="Indice 2";}
   else{sqEl(mv.to).classList.add("hint");$("parch").innerHTML=`<p>Indice 2 : elle va sur l'autre case qui brille. ${etoilesHTML(1)}</p>`;$("bIndice").textContent="Solution";}};
-$("bSolution").onclick=()=>{if(etat!=="jeu")return;indice=3;bilan(false,0);$("parch").innerHTML=`<p><span class="ko">Voici la solution.</span><br>${PZ.x}</p>`;montrerSolution(true);$("bIndice").disabled=true;$("bSolution").disabled=true;iaBouton("bExplique","parch",()=>iaQuestionEpreuve(null));finEpreuve(false);};
+$("bSolution").onclick=()=>{if(etat!=="jeu")return;indice=3;bilan(false,0);$("parch").innerHTML=`<p><span class="ko">Voici la solution.</span> <b>Joue toi-même le coup de la flèche verte</b> pour voir ce qui se passe.</p>`;corriger();$("bIndice").disabled=true;$("bSolution").disabled=true;iaBouton("bExplique","parch",()=>iaQuestionEpreuve(null));finEpreuve(false);};
 $("bSon").onclick=()=>{S.son=!S.son;save();$("bSon").textContent="Son : "+(S.son?"oui":"non");$("bSon").setAttribute("aria-pressed",S.son);};
 $("bSon").textContent="Son : "+(S.son?"oui":"non");
 $("nom").addEventListener("input",e=>{S.nom=e.target.value;save();majEntete();});
@@ -184,7 +202,8 @@ function onglet(v){
   if(v==="salle"){
     $("sSlot").appendChild($("plateau"));
     if(etat==="attente")charger(PZ); // une réponse adverse était en route : on reprend l'épreuve
-    else{G=new Chess(PZ.fen);for(let i=0;i<step_;i++)G.move(PZ.line[i]);flip=(PZ.a?(new Chess(PZ.fen).turn()==="w"?"b":"w"):new Chess(PZ.fen).turn())==="b";draw();}
+    else if(etat==="suite"){etat="fini";G=new Chess(PZ.fen);for(let i=0;i<step_;i++)G.move(PZ.line[i]);draw();} // la correction s'arrête là
+    else{G=new Chess(PZ.fen);for(let i=0;i<step_;i++)G.move(PZ.line[i]);flip=(PZ.a?(new Chess(PZ.fen).turn()==="w"?"b":"w"):new Chess(PZ.fen).turn())==="b";draw();if(etat==="corrige")corriger();}
   }else if(v==="tournoi"){
     $("tSlot").appendChild($("plateau"));
     MOTEUR.demarrer();tAfficher();tEntete();
