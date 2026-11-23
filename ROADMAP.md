@@ -83,3 +83,9 @@ Plan validé par Jean-François le 2026-11-23 (« je veux tout faire ») ; style
 - ✅ 5 nouveaux hauts faits ; blason : étoiles, record de joute, lieux conquis. Sauvegarde migrée sans perte (testé avec une sauvegarde du lot 6).
 - ✅ Testé dans Chromium : quête complète jusqu'au coffre, carte, joute, jokers, finale gagnée et reprise après rechargement ; tests des lots précédents au vert.
 - ⏳ Essai sur la tablette avec l'enfant (réglage des 5 épreuves par lieu, durée de la joute).
+
+## Lot 10 — Rejouer le bon coup ✅ (sauf essai sur tablette)
+Demande de Jean-François (2026-11-23) : après une erreur, la flèche verte seule ne suffit pas à comprendre.
+- ✅ Salle d'armes : après une erreur ou la solution, l'enfant joue lui-même le coup de la flèche verte ; l'adversaire répond, puis une nouvelle flèche montre le coup suivant, jusqu'à la fin de la ligne. L'explication vient à la fin. Un autre coup est refusé avec un message. (La joute garde l'enchaînement rapide.)
+- ✅ Conseil de guerre : l'enfant peut jouer le coup vert (ou toucher « Bon coup ») ; Stockfish montre alors la meilleure réponse de l'adversaire.
+- ✅ Corrigé au passage : toucher l'échiquier pendant le conseil ne joue plus de coup dans la partie du tournoi en cours.
