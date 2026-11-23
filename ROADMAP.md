@@ -13,12 +13,13 @@ Légende : ✅ fait · 🔄 en cours · ⏳ à faire
 - ⏳ Publication GitHub Pages. **Action de Jean-François** : passer le dépôt en public puis activer Pages (branche `main`, dossier racine) depuis un ordinateur.
 - Terminé quand : l'appli tourne sur `jef1234567.github.io/chess-/`, s'installe sur la tablette et la vérification passe au vert.
 
-## Lot 2 — Salle d'armes v2 🔄
+## Lot 2 — Salle d'armes v2 ✅ (sauf essai sur tablette)
 - ✅ Import de la base libre Lichess (CC0) : `tools/importer-lichess.js`, lancé par la GitHub Action « Import Lichess » (le réseau des sessions Claude ne joint pas database.lichess.org). Filtre : cotes 400–1500, problèmes populaires et bien notés, au plus 3 coups du joueur, tirage stable par tranche de 100 points de cote.
 - ✅ Les problèmes importés commencent par le coup de l'adversaire, joué automatiquement ; lignes de plusieurs coups gérées.
 - ✅ Révision ciblée : une épreuve ratée revient plus tard, les thèmes les moins réussis sortent plus souvent, les épreuves déjà réussies passent après les nouvelles. Sauvegarde migrée sans perte (champs `aRevoir`, `reussis`).
 - ✅ Nouveaux thèmes : attaque double, découverte, défense, finales (pions et tours).
-- ⏳ Contrôler le nombre final de problèmes vérifiés et la fluidité sur la tablette.
+- ✅ 2 373 problèmes Lichess importés et vérifiés (2 392 au total). Chargement mesuré à 0,5 s avec un processeur ralenti 6 fois ; 40 problèmes tirés au hasard résolus par l'interface.
+- ⏳ Confirmer la fluidité sur la vraie tablette (après publication).
 - Terminé quand : au moins 2 000 problèmes vérifiés, chargés hors ligne sans ralentir la tablette.
 
 ## Lot 3 — Le tournoi ⏳
