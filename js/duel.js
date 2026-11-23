@@ -32,7 +32,7 @@ async function dDechiffrer(s){if(typeof s!=="string"||!s.startsWith("sa1:"))retu
 function dEcouter(){ // abonnement : flux SSE ; à la coupure, on se réabonne à partir du dernier message reçu
   dFermer();if(!D.sujet)return;
   const es=new EventSource(`${RELAIS}/${D.sujet}/sse?since=${D.dernier||"all"}`);D.es=es;
-  es.onopen=()=>{D.delai=2000;dConnexion("ok");dEnvoyerEtat();};
+  es.onopen=()=>{D.delai=2000;dConnexion("ok");if(!D.annonce){D.annonce=true;dEnvoyerEtat();}}; // une annonce par ouverture de l'appli : le relais limite à 250 messages par jour
   es.onmessage=async e=>{let m;try{m=JSON.parse(e.data);}catch(x){return;}
     if(!m||m.event!=="message")return;D.dernier=m.id;const o=await dDechiffrer(m.message);if(o)dRecevoir(o);};
   es.onerror=()=>{if(D.es!==es)return;dFermer();dConnexion("perdu");
@@ -131,7 +131,7 @@ function dEcran(e){$("dAccueil").hidden=e!=="accueil";$("dAttente").hidden=e!=="
 function dMontrerJeu(){if(mode==="duel"&&D.jeu){dEcran("jeu");
   dMsg(!D.vu&&D.role==="h"?"Ton adversaire n'est pas encore là. Tu peux jouer ton premier coup.":dTermine()?"La partie est finie.":G.turn()===dCamp()?"À toi de jouer !":`${esc(D.adv||"Ton adversaire")} réfléchit…`);}}
 async function dOuvrir(code,role,camp){
-  await dPreparer(code);D.code=code;D.role=role;D.adv="";D.vu=false;D.dernier=null;
+  await dPreparer(code);D.annonce=false;D.code=code;D.role=role;D.adv="";D.vu=false;D.dernier=null;
   D.jeu=role==="h"?{p:1,blanc:camp==="b"?"i":"h",coups:[],fin:null}:null;
   dSauver();dEcouter();
   if(role==="h")dEcran("attente");else{dEcran("jeu");dMsg("Je cherche le duel…");dEntete();dEnvoyerEtat();}
