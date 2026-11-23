@@ -37,7 +37,7 @@ header{display:flex;align-items:center;gap:12px}
 .theme-tag{margin-left:auto;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--or);border:1px solid #5a4a20;padding:3px 8px;border-radius:999px;white-space:nowrap}
 
 .plateau{position:relative;padding:10px;border-radius:16px;background:linear-gradient(145deg,#3a4672,#1c2546);box-shadow:0 12px 40px #0008, inset 0 0 0 2px #6a5a2a}
-.board{position:relative;width:100%;aspect-ratio:1;max-width:100%;border-radius:6px;overflow:hidden;touch-action:manipulation}
+.board{position:relative;width:100%;aspect-ratio:1;max-width:100%;border-radius:6px;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
 .sq{position:absolute;width:12.5%;height:12.5%}
 .sq.l{background:var(--case-claire)}.sq.d{background:var(--case-sombre)}
 .sq .co{position:absolute;font-size:9px;font-weight:800;opacity:.75;pointer-events:none}

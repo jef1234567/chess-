@@ -89,3 +89,9 @@ Demande de Jean-François (2026-11-23) : après une erreur, la flèche verte seu
 - ✅ Salle d'armes : après une erreur ou la solution, l'enfant joue lui-même le coup de la flèche verte ; l'adversaire répond, puis une nouvelle flèche montre le coup suivant, jusqu'à la fin de la ligne. L'explication vient à la fin. Un autre coup est refusé avec un message. (La joute garde l'enchaînement rapide.)
 - ✅ Conseil de guerre : l'enfant peut jouer le coup vert (ou toucher « Bon coup ») ; Stockfish montre alors la meilleure réponse de l'adversaire.
 - ✅ Corrigé au passage : toucher l'échiquier pendant le conseil ne joue plus de coup dans la partie du tournoi en cours.
+
+## Lot 11 — Coups impossibles expliqués ✅ (sauf essai sur tablette)
+Retour de Jean-François (2026-11-23) : « au tournoi, il me bloque des coups ». Vérifié : tout coup légal est accepté (48 coups au hasard joués par l'interface). Les coups refusés sont ceux que les règles interdisent ; ils l'étaient en silence.
+- ✅ Chaque coup impossible est expliqué : pièce clouée, roi en échec qu'il faut sauver, case attaquée pour le roi, roque interdit, déplacement de la pièce (partout : salle, tournoi, conseil).
+- ✅ Toucher pendant que l'adversaire réfléchit : message « Attends ton tour ».
+- ✅ Glisser-déposer au doigt, en plus du toucher case par case.

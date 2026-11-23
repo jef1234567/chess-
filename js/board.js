@@ -66,8 +66,10 @@ function addPiece(sq,p){const e=document.createElement("div");e.className="pc "+
 function tr(sq,plus=""){const[f,r]=xy(sq);return `translate(${f*100}%,${r*100}%)${plus}`;}
 function place(e,sq){e.style.transform=tr(sq);}
 /* Déplacement en arc : la pièce se lève, file, puis se pose avec un rebond et un peu de poussière. */
+let poseDirecte=false; // pièce lâchée au doigt : pas de vol en arc
 function glisse(e,from,to){
   place(e,to);
+  if(poseDirecte){poseDirecte=false;return 0;}
   if(REDUIT()||!e.animate)return 0;
   const[f1,r1]=xy(from),[f2,r2]=xy(to),dist=Math.hypot(f2-f1,r2-r1);
   const h=Math.min(55,18+dist*6),dur=Math.round(300+dist*35);
