@@ -6,10 +6,11 @@ Légende : ✅ fait · 🔄 en cours · ⏳ à faire
 - Salle d'armes : 19 épreuves vérifiées (mat en 1, mat en 2, fourchette, pièce gratuite, enfilade, clouage), indices, correction par flèche, cote adaptative, blason et grades.
 - Web app hors ligne (manifeste, service worker, polices locales).
 
-## Lot 1 — Socle ⏳
-- Découper `index.html` en modules (`js/board.js`, `js/puzzles.js`, `js/profile.js`, `js/sound.js`, `css/`).
-- Script de vérification des problèmes (Node + chess.js) et GitHub Action qui le lance à chaque envoi.
-- Publication GitHub Pages. **Action de Jean-François** : passer le dépôt en public puis activer Pages (branche `main`, dossier racine) depuis un ordinateur.
+## Lot 1 — Socle 🔄
+- ✅ `index.html` découpé en modules : `js/puzzles.js`, `js/profile.js`, `js/sound.js`, `js/board.js`, `js/app.js`, `css/app.css`.
+- ✅ Script de vérification des problèmes (`tools/verifier.js`, Node + chess.js) et GitHub Action qui le lance à chaque envoi, avec le contrôle du cache hors ligne (`tools/verifier-cache.js`).
+- ✅ Corrections trouvées en route : les pièces ne s'affichaient pas (chess.js 0.10.3 ne donne pas la case dans `board()`) ; positions illégales dans m2 et m10 (roi noir déjà en échec) ; f1 ne gagnait que la qualité (cavalier piégé en a8), roi blanc rapproché.
+- ⏳ Publication GitHub Pages. **Action de Jean-François** : passer le dépôt en public puis activer Pages (branche `main`, dossier racine) depuis un ordinateur.
 - Terminé quand : l'appli tourne sur `jef1234567.github.io/chess-/`, s'installe sur la tablette et la vérification passe au vert.
 
 ## Lot 2 — Salle d'armes v2 ⏳

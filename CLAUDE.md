@@ -15,11 +15,12 @@ Jeu d'échecs d'entraînement pour un enfant de 8 ans qui joue déjà relativeme
 - Toute ressource (police, script, image, son) est dans le dépôt et listée dans `sw.js`. Changer `V` dans `sw.js` à chaque version.
 
 ## Architecture
-- `index.html` : application (interface, logique d'épreuve, profil).
+- `index.html` : squelette de la page ; charge `css/app.css` puis les scripts dans l'ordre ci-dessous (scripts classiques, sans module ni build).
+- `js/puzzles.js` (thèmes, problèmes), `js/profile.js` (grades, sauvegarde), `js/sound.js` (sons), `js/board.js` (échiquier, animations), `js/app.js` (logique d'épreuve, blason, interface).
+- `tools/verifier.js` : vérification des problèmes ; `tools/verifier-cache.js` : contrôle de la liste de `sw.js`. Lancés par `.github/workflows/verifier.yml`.
 - `chess.js` : règles du jeu (chess.js 0.10.3, BSD-2), ne pas modifier.
 - `sw.js` + `manifest.webmanifest` : installation et cache hors ligne.
 - `fonts/`, `icons/` : ressources locales.
-- Lot 1 découpe `index.html` en modules sous `js/` et `css/`.
 
 ## Règles de travail
 - Une branche par lot (`lot-1-socle`, …), fusion dans `main` après vérification.

@@ -1,0 +1,17 @@
+name: Vérification des problèmes
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+jobs:
+  verifier:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Vérifier chaque problème d'échecs
+        run: node tools/verifier.js
+      - name: Vérifier que sw.js liste toutes les ressources
+        run: node tools/verifier-cache.js
