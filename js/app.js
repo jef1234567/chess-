@@ -173,7 +173,6 @@ function onglet(v){
   mode=v;
   for(const[k,id,t]of[["salle","vSalle","tSalle"],["tournoi","vTournoi","tTournoiB"],["blason","vBlason","tBlason"]]){
     $(id).hidden=k!==v;$(t).setAttribute("aria-current",k===v);}
-  $("vSalle").style.display=v==="salle"?"flex":"none";
   clearMarks();sel=null;
   if(v==="salle"){
     $("sSlot").appendChild($("plateau"));

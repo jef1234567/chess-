@@ -50,3 +50,13 @@ Légende : ✅ fait · 🔄 en cours · ⏳ à faire
 - ✅ Sons : échec (trompette brève) et fanfare de haut fait, en plus des sons existants ; tous synthétisés, aucun fichier.
 - ✅ Récompenses : 14 hauts faits (séries, mats, thèmes, grades, victoires au tournoi, conseil de guerre). Certains débloquent les pièces Celtiques et les échiquiers Forêt, Sable et Or royal.
 - ⏳ Test réel avec l'enfant sur la Samsung (Jean-François, après publication) : fluidité, force des niveaux du tournoi, goût pour les pièces et les récompenses.
+
+## Lot 7 — Plein écran ✅ (sauf essai sur tablette)
+- ✅ L'appli tient dans la hauteur de l'écran : plus de défilement dans la Salle, le Tournoi et le Conseil ; le Blason défile seul.
+- ✅ L'échiquier est le plus grand carré qui tient (requêtes de conteneur CSS) ; en-tête, thèmes, mission, parchemin et boutons réduits.
+- ✅ Paysage : échiquier à gauche, texte et boutons à droite.
+- ✅ Testé dans Chromium : tablette 800×1280 et 1280×800 (avec et sans barre de Chrome), téléphone 360×660 et 740×330 ; aucun défilement, échiquier de 745 px en portrait tablette.
+- ⏳ Essai sur la tablette.
+
+## Lots suivants — à valider
+Plan proposé à Jean-François le 2026-11-23 (graphisme et animations, puis gameplay ; API plus tard). Lots 8 et 9 à préciser après sa validation.

@@ -20,14 +20,14 @@
     <div class="badge"><b id="gradeTop">Page</b><span id="xpTxt">0 XP</span><div class="xpbar"><i id="xpBar" style="width:0%"></i></div></div>
   </header>
 
-  <section id="vSalle" style="display:flex;flex-direction:column;gap:14px">
+  <section id="vSalle" class="jeu">
     <div class="chips" id="chips" role="group" aria-label="Choisir un thème"></div>
     <div class="mission">
       <div class="trait w" id="trait" aria-hidden="true"></div>
       <div><h2 id="mTitre">…</h2><p id="mTexte">…</p></div>
       <div class="theme-tag" id="mTheme">…</div>
     </div>
-    <div id="sSlot"><div class="plateau" id="plateau">
+    <div id="sSlot" class="slot"><div class="plateau" id="plateau">
       <div class="board" id="board" aria-label="Échiquier"></div>
       <div class="sceau" id="sceau"><div id="sceauTxt">Bravo !</div></div>
     </div></div>
@@ -35,7 +35,7 @@
     <div class="actions">
       <button id="bIndice" type="button">Indice</button>
       <button id="bSolution" type="button">Solution</button>
-      <button id="bSuivant" class="or" type="button">Épreuve suivante</button>
+      <button id="bSuivant" class="or" type="button">Suivante</button>
       <button id="bSon" type="button" aria-pressed="true" title="Son">Son : oui</button>
       <button id="bExplique" type="button" hidden>Explique-moi</button>
     </div>
@@ -50,34 +50,34 @@
       <div class="chips wrap" id="tCamps" role="group" aria-label="Couleur"></div>
       <button id="tGo" class="or" type="button">En garde !</button>
     </div>
-    <div id="tJeu" class="tjeu" hidden>
+    <div id="tJeu" class="tjeu jeu" hidden>
       <div class="mission">
         <div class="trait w" id="tTrait" aria-hidden="true"></div>
         <div><h2 id="tTitre">Le tournoi</h2><p id="tTexte">Choisis ton adversaire.</p></div>
         <div class="theme-tag" id="tNiv">—</div>
       </div>
-      <div id="tSlot"></div>
+      <div id="tSlot" class="slot"></div>
       <div class="parchemin" id="tParch"><p>…</p></div>
       <div class="actions">
-        <button id="tNouvelle" class="or" type="button">Nouvelle partie</button>
+        <button id="tNouvelle" class="or" type="button">Nouvelle</button>
         <button id="tAbandon" type="button">Abandonner</button>
-        <button id="tConseil" type="button" hidden>Conseil de guerre</button>
+        <button id="tConseil" type="button" hidden>Conseil</button>
       </div>
     </div>
-    <div id="cJeu" class="tjeu" hidden>
+    <div id="cJeu" class="tjeu jeu" hidden>
       <div class="mission">
         <div class="trait w" id="cTrait" aria-hidden="true"></div>
         <div><h2>Le conseil de guerre</h2><p id="cTexte">Les sages étudient ta partie…</p></div>
         <div class="theme-tag" id="cNum">—</div>
       </div>
-      <div id="cSlot"></div>
+      <div id="cSlot" class="slot"></div>
       <div class="parchemin" id="cParch"><p>…</p></div>
       <div class="actions">
         <button id="cPrec" type="button">Précédent</button>
-        <button id="cMontrer" type="button">Montre le bon coup</button>
+        <button id="cMontrer" type="button">Bon coup</button>
         <button id="cSuiv" type="button">Suivant</button>
         <button id="cExplique" type="button" hidden>Explique-moi</button>
-        <button id="cFermer" class="or" type="button">Retour au tournoi</button>
+        <button id="cFermer" class="or" type="button">Retour</button>
       </div>
     </div>
   </section>

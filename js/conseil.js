@@ -80,7 +80,7 @@ function cAfficher(){
   $("cTexte").textContent=`Coup ${num} : tu as joué ${k.m.san}`;
   cMsg(`<span class="ko">Flèche rouge : ton coup.</span> <span class="ok">Flèche verte : le meilleur.</span><br>${cPhrase(k)}`);
   $("cPrec").disabled=C.i===0;$("cSuiv").disabled=C.i>=C.cles.length-1;$("cMontrer").disabled=!best;
-  $("cMontrer").textContent="Montre le bon coup";
+  $("cMontrer").textContent="Bon coup";
   iaBouton("cExplique","cParch",()=>iaQuestionConseil(k));
 }
 function cQuitter(){ // ferme le conseil sans toucher à l'échiquier (changement d'onglet)
@@ -98,6 +98,6 @@ $("cMontrer").onclick=()=>{
   const k=C.cles[C.i];if(!k)return;
   if(C.montre){cAfficher();return;}
   clearArrows();const m=G.move(uciCoup(k.E0.coup));if(m)animMove(m);
-  C.montre=true;$("cMontrer").textContent="Revoir la position";
+  C.montre=true;$("cMontrer").textContent="Revoir";
 };
 $("cFermer").onclick=cFermer;
