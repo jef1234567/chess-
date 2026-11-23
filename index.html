@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="fr"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#10172e">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>La Salle d'armes</title>
+<style>
+@font-face{font-family:"Uncial Antiqua";src:url(fonts/uncial.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"Nunito";font-weight:400 600;src:url(fonts/nunito-400.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"Nunito";font-weight:700;src:url(fonts/nunito-700.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"Nunito";font-weight:800;src:url(fonts/nunito-800.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"Noto Sans Symbols 2";src:url(fonts/symbols.woff2) format("woff2");font-display:block}
+*{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px)}
+body{margin:0}
+[hidden]{display:none!important}
+/* Mise en page : une seule colonne façon tablette — bandeau du héraut, échiquier-écu au centre, parchemin de mission dessous ; onglets en bas. Thème nuit de château, volontairement unique. */
+:root{
+  --nuit:#10172e; --nuit-2:#18223f; --azur:#24427f; --or:#e3b84b; --or-pale:#f3dc94;
+  --gueules:#b8343e; --sinople:#2f8f5b; --texte:#eef0f7; --texte-doux:#a9b2cc;
+  --case-claire:#d6cfbd; --case-sombre:#56739a; --pierre:#2a3557;
+  --f-titre:"Uncial Antiqua", Georgia, serif; --f-corps:"Nunito", system-ui, sans-serif;
+  --f-piece:"Noto Sans Symbols 2","Segoe UI Symbol","DejaVu Sans",serif;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:radial-gradient(120% 80% at 50% 0%,#1d2b55 0%,var(--nuit) 60%) fixed,var(--nuit);color:var(--texte);font-family:var(--f-corps);font-size:16px;-webkit-tap-highlight-color:transparent}
+.app{max-width:560px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 96px;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:center;gap:12px}
+.ecu{width:46px;height:54px;flex:none}
+.titre{font-family:var(--f-titre);font-size:1.45rem;color:var(--or);line-height:1.1;text-wrap:balance}
+.sous{color:var(--texte-doux);font-size:.85rem}
+.badge{margin-left:auto;text-align:right;font-size:.8rem;color:var(--texte-doux)}
+.badge b{display:block;color:var(--or-pale);font-size:.95rem}
+.xpbar{height:6px;background:var(--pierre);border-radius:3px;overflow:hidden;margin-top:4px;width:110px}
+.xpbar i{display:block;height:100%;background:linear-gradient(90deg,var(--or),var(--or-pale));transition:width .6s}
+
+.mission{background:var(--nuit-2);border:1px solid #2c3a66;border-radius:14px;padding:12px 14px;display:flex;gap:12px;align-items:center}
+.trait{width:28px;height:28px;border-radius:50%;flex:none;border:2px solid var(--or)}
+.trait.w{background:#f4efe1}.trait.b{background:#1b1a26}
+.mission h2{margin:0;font-family:var(--f-titre);font-weight:400;font-size:1.15rem;color:var(--or-pale)}
+.mission p{margin:2px 0 0;color:var(--texte-doux);font-size:.88rem}
+.theme-tag{margin-left:auto;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--or);border:1px solid #5a4a20;padding:3px 8px;border-radius:999px;white-space:nowrap}
+
+.plateau{position:relative;padding:10px;border-radius:16px;background:linear-gradient(145deg,#3a4672,#1c2546);box-shadow:0 12px 40px #0008, inset 0 0 0 2px #6a5a2a}
+.board{position:relative;width:100%;aspect-ratio:1;max-width:100%;border-radius:6px;overflow:hidden;touch-action:manipulation}
+.sq{position:absolute;width:12.5%;height:12.5%}
+.sq.l{background:var(--case-claire)}.sq.d{background:var(--case-sombre)}
+.sq .co{position:absolute;font-size:9px;font-weight:800;opacity:.75;pointer-events:none}
+.sq.l .co{color:var(--case-sombre)}.sq.d .co{color:var(--case-claire)}
+.co.f{right:3px;bottom:1px}.co.r{left:3px;top:1px}
+.sq.sel{box-shadow:inset 0 0 0 999px #e3b84b66}
+.sq.last{box-shadow:inset 0 0 0 999px #e3b84b38}
+.sq.hint{animation:luire 1s ease-in-out infinite alternate}
+@keyframes luire{from{box-shadow:inset 0 0 0 999px #2f8f5b22}to{box-shadow:inset 0 0 0 999px #2f8f5b99}}
+.sq .dot{position:absolute;inset:36%;border-radius:50%;background:#10172e55;pointer-events:none}
+.sq .ring{position:absolute;inset:4%;border-radius:50%;border:4px solid #10172e55;pointer-events:none}
+.pc{position:absolute;left:0;top:0;width:12.5%;height:12.5%;display:grid;place-items:center;pointer-events:none;
+  font-family:var(--f-piece);line-height:1;transition:transform .32s cubic-bezier(.3,.7,.25,1.15);will-change:transform}
+.pc span{font-size:clamp(28px,9.4vmin,58px);transform:translateY(-2%)}
+.pc.w span{color:#f6f1e3;text-shadow:0 0 1px #000,0 0 1px #000,1px 1px 0 #2b2b3a,-1px -1px 0 #2b2b3a,1px -1px 0 #2b2b3a,-1px 1px 0 #2b2b3a,0 4px 6px #0007}
+.pc.b span{color:#1e1b2b;text-shadow:0 0 1px #cfc6ad,1px 0 0 #9a8f74,0 4px 6px #0006}
+.pc.up span{animation:leve .25s ease-out forwards}
+@keyframes leve{to{transform:translateY(-10%) scale(1.12)}}
+.pc.out{transition:transform .5s ease-in,opacity .5s ease-in;opacity:0}
+.board.shake{animation:secoue .4s}
+@keyframes secoue{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+svg.fleches{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.sceau{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
+.sceau div{font-family:var(--f-titre);font-size:clamp(28px,9vmin,48px);color:var(--or-pale);background:#10172ee0;border:3px solid var(--or);padding:10px 22px;border-radius:14px;transform:scale(.3) rotate(-8deg);opacity:0;transition:transform .45s cubic-bezier(.2,1.6,.4,1),opacity .2s;text-shadow:0 2px 0 #000}
+.sceau.on div{transform:scale(1) rotate(-4deg);opacity:1}
+.sceau.rate div{color:#ffd0d3;border-color:var(--gueules)}
+
+.parchemin{background:var(--nuit-2);border-radius:14px;padding:14px;border:1px solid #2c3a66;min-height:58px}
+.parchemin p{margin:0;line-height:1.5}
+.parchemin .ok{color:#9be3b8;font-weight:800}.parchemin .ko{color:#ffb3b8;font-weight:800}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+button{font:inherit;font-weight:800;border:0;border-radius:12px;padding:12px 16px;cursor:pointer;color:var(--texte);background:var(--pierre);min-height:48px}
+button:focus-visible{outline:3px solid var(--or-pale);outline-offset:2px}
+button.or{background:linear-gradient(180deg,var(--or-pale),var(--or));color:#2a1e05;flex:1}
+button:disabled{opacity:.45;cursor:default}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.chip{background:transparent;border:1px solid #3a4a7a;color:var(--texte-doux);border-radius:999px;padding:8px 12px;min-height:40px;white-space:nowrap;font-weight:700;font-size:.85rem}
+.chip.on{background:var(--azur);color:var(--texte);border-color:var(--or)}
+
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;gap:8px;background:#0c1226ee;border-top:1px solid #2c3a66;padding:8px max(16px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));backdrop-filter:blur(6px);z-index:5}
+nav button{flex:1;max-width:240px;background:transparent;color:var(--texte-doux)}
+nav button[aria-current="true"]{color:var(--or-pale);background:#1f2b52}
+
+.blason{display:flex;flex-direction:column;gap:14px}
+.carte{background:var(--nuit-2);border:1px solid #2c3a66;border-radius:14px;padding:16px}
+.carte h3{margin:0 0 10px;font-family:var(--f-titre);font-weight:400;color:var(--or);font-size:1.15rem}
+.grade{display:flex;gap:14px;align-items:center}
+.grade .ecu{width:70px;height:82px}
+.grade b{font-family:var(--f-titre);font-size:1.5rem;color:var(--or-pale);font-weight:400}
+label{display:block;font-size:.85rem;color:var(--texte-doux);margin-bottom:4px}
+input{font:inherit;width:100%;padding:10px 12px;border-radius:10px;border:1px solid #3a4a7a;background:var(--nuit);color:var(--texte);box-sizing:border-box}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.stats div{background:var(--nuit);border-radius:10px;padding:10px 4px}
+.stats b{display:block;font-size:1.4rem;color:var(--or-pale);font-variant-numeric:tabular-nums}
+.stats span{font-size:.75rem;color:var(--texte-doux)}
+.th{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;margin-bottom:10px}
+.th span{font-size:.9rem}.th em{font-style:normal;color:var(--texte-doux);font-size:.8rem;font-variant-numeric:tabular-nums}
+.th .bar{grid-column:1/-1;height:8px;background:var(--nuit);border-radius:4px;overflow:hidden}
+.th .bar i{display:block;height:100%;background:var(--sinople)}
+.hist{display:flex;flex-direction:column;gap:6px;font-size:.88rem}
+.hist div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid #263257;padding-bottom:6px}
+.note{font-size:.8rem;color:var(--texte-doux)}
+canvas.fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9}
+@media (prefers-reduced-motion:reduce){.pc,.pc.out,.sceau div{transition:none}.board.shake,.sq.hint{animation:none}}
+</style>
+</head>
+<body>
+
+<canvas class="fx" id="fx"></canvas>
+<div class="app">
+  <header>
+    <svg class="ecu" viewBox="0 0 40 48" aria-hidden="true"><path d="M3 3h34v18c0 13-9 21-17 24C12 42 3 34 3 21z" fill="#24427f" stroke="#e3b84b" stroke-width="2.5"/><path d="M20 10l3 6h6l-5 4 2 7-6-4-6 4 2-7-5-4h6z" fill="#e3b84b"/></svg>
+    <div><div class="titre">La Salle d'armes</div><div class="sous" id="salut">Entraîne-toi, jeune écuyer</div></div>
+    <div class="badge"><b id="gradeTop">Page</b><span id="xpTxt">0 XP</span><div class="xpbar"><i id="xpBar" style="width:0%"></i></div></div>
+  </header>
+
+  <section id="vSalle" style="display:flex;flex-direction:column;gap:14px">
+    <div class="chips" id="chips" role="group" aria-label="Choisir un thème"></div>
+    <div class="mission">
+      <div class="trait w" id="trait" aria-hidden="true"></div>
+      <div><h2 id="mTitre">…</h2><p id="mTexte">…</p></div>
+      <div class="theme-tag" id="mTheme">…</div>
+    </div>
+    <div class="plateau">
+      <div class="board" id="board" aria-label="Échiquier"></div>
+      <div class="sceau" id="sceau"><div id="sceauTxt">Bravo !</div></div>
+    </div>
+    <div class="parchemin" id="parch"><p>Touche une pièce, puis la case où tu veux la jouer.</p></div>
+    <div class="actions">
+      <button id="bIndice" type="button">Indice</button>
+      <button id="bSolution" type="button">Solution</button>
+      <button id="bSuivant" class="or" type="button">Épreuve suivante</button>
+      <button id="bSon" type="button" aria-pressed="true" title="Son">Son : oui</button>
+    </div>
+  </section>
+
+  <section id="vBlason" class="blason" hidden>
+    <div class="carte grade">
+      <svg class="ecu" viewBox="0 0 40 48" aria-hidden="true"><path d="M3 3h34v18c0 13-9 21-17 24C12 42 3 34 3 21z" fill="#b8343e" stroke="#e3b84b" stroke-width="2.5"/><path d="M20 9v30M9 20h22" stroke="#e3b84b" stroke-width="4"/></svg>
+      <div><div class="note">Ton grade</div><b id="gGrade">Page</b><div class="note" id="gProchain"></div></div>
+    </div>
+    <div class="carte">
+      <label for="nom">Nom du chevalier</label>
+      <input id="nom" maxlength="24" placeholder="Ton prénom" autocomplete="off">
+    </div>
+    <div class="carte"><h3>Exploits</h3>
+      <div class="stats"><div><b id="sReussi">0</b><span>épreuves réussies</span></div><div><b id="sSerie">0</b><span>meilleure série</span></div><div><b id="sCote">600</b><span>cote d'armes</span></div></div>
+    </div>
+    <div class="carte"><h3>Maîtrise des bottes</h3><div id="themes"></div></div>
+    <div class="carte"><h3>Dernières épreuves</h3><div class="hist" id="hist"></div></div>
+    <p class="note">La progression est gardée sur cet appareil uniquement.</p>
+  </section>
+</div>
+<nav>
+  <button id="tSalle" type="button" aria-current="true">Salle d'armes</button>
+  <button id="tBlason" type="button" aria-current="false">Mon blason</button>
+</nav>
+
+<script src="chess.js"></script>
+<script>
+const THEMES={mat1:"Mat en 1",mat2:"Mat en 2",fourchette:"Fourchette",prise:"Pièce gratuite",enfilade:"Enfilade",clouage:"Clouage"};
+const P=[
+{id:"m1",t:"mat1",r:500,fen:"6k1/5ppp/8/8/8/8/5PPP/3R2K1 w - - 0 1",line:["Rd8#"],x:"La tour donne échec sur la dernière rangée et les pions noirs bouchent la sortie du roi : c'est le mat du couloir."},
+{id:"m2",t:"mat1",r:450,fen:"k7/8/1K6/8/8/8/8/7Q w - - 0 1",line:["Qh8#"],x:"Ton roi garde les cases a7, b7 et c7. La dame n'a plus qu'à donner échec sur la 8e rangée."},
+{id:"m3",t:"mat1",r:750,fen:"6rk/6pp/8/6N1/8/8/8/6K1 w - - 0 1",line:["Nf7#"],x:"Mat à l'étouffée : le roi noir est enfermé par ses propres pièces, et le cavalier saute par-dessus tout le monde."},
+{id:"m4",t:"mat1",r:500,fen:"3r2k1/5ppp/8/8/8/8/5PPP/6K1 b - - 0 1",line:["Rd1#"],x:"Même piège de l'autre côté : le roi blanc est prisonnier de ses pions, la tour noire frappe en d1."},
+{id:"m5",t:"mat1",r:550,fen:"r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 0 1",line:["Qxf7#"],x:"Le coup du berger : f7 n'est défendue que par le roi, et ton fou protège la dame. Le roi ne peut pas la prendre."},
+{id:"m6",t:"mat1",r:450,fen:"rnbqkbnr/pppp1ppp/8/4p3/6P1/5P2/PPPPP2P/RNBQKBNR b KQkq - 0 1",line:["Qh4#"],x:"Les blancs ont ouvert la diagonale de leur roi. La dame noire s'y glisse : c'est le mat le plus rapide du jeu !"},
+{id:"m7",t:"mat1",r:600,fen:"4r1k1/5ppp/8/8/8/8/5PPP/3RR1K1 w - - 0 1",line:["Rxe8#"],x:"La tour noire était la seule gardienne de la 8e rangée. En la prenant, tu donnes échec et le roi reste coincé."},
+{id:"m8",t:"mat1",r:800,fen:"6k1/5p1p/6pB/8/8/8/8/3Q2K1 w - - 0 1",line:["Qd8#"],x:"Le fou en h6 surveille f8 et g7. La dame descend en d8 et le roi n'a plus aucune case."},
+{id:"m9",t:"mat1",r:700,fen:"6k1/8/8/8/5n2/6q1/7P/7K b - - 0 1",line:["Qg2#"],x:"Le cavalier f4 protège la dame : le roi blanc ne peut pas la prendre en g2. (Dame e1 marchait aussi !)"},
+{id:"m10",t:"mat1",r:500,fen:"7k/8/6K1/8/8/8/8/Q7 w - - 0 1",line:["Qa8#"],x:"Ton roi enferme le roi noir dans le coin, ta dame porte le coup final."},
+{id:"f1",t:"fourchette",r:700,fen:"r3k3/8/8/1N6/8/8/8/4K3 w - - 0 1",line:["Nc7+"],x:"Le cavalier attaque le roi ET la tour en même temps. Le roi doit fuir, la tour tombe au coup suivant."},
+{id:"f2",t:"fourchette",r:800,fen:"3q4/6k1/8/8/3N4/8/8/4K3 w - - 0 1",line:["Ne6+"],x:"Échec au roi et attaque sur la dame : une fourchette royale ! La dame est perdue."},
+{id:"h1",t:"prise",r:400,fen:"4k3/8/8/8/3q4/8/1B6/4K3 w - - 0 1",line:["Bxd4"],x:"La dame noire n'était défendue par personne. Avant tout, regarde toujours ce qui est gratuit !"},
+{id:"h2",t:"prise",r:420,fen:"4k3/1r6/8/8/8/8/1Q6/4K3 b - - 0 1",line:["Rxb2"],x:"La dame blanche est seule sur la colonne b : ta tour la prend sans danger."},
+{id:"s1",t:"enfilade",r:950,fen:"4q3/8/8/4k3/8/8/8/R6K w - - 0 1",line:["Re1+"],x:"Une enfilade : la tour attaque le roi, il doit s'écarter de la colonne, et la dame cachée derrière lui tombe."},
+{id:"p1",t:"clouage",r:1000,fen:"4k3/8/2q5/8/P7/8/8/4KB2 w - - 0 1",line:["Bb5"],x:"Le fou cloue la dame contre son roi : elle ne peut plus bouger. Si elle prend le fou, ton pion a4 la reprend."},
+{id:"d1",t:"mat2",r:950,fen:"6k1/8/8/8/8/8/R7/1R4K1 w - - 0 1",line:["Ra7","Kf8","Rb8#"],x:"L'escalier des tours : une tour ferme la 7e rangée, l'autre donne mat sur la 8e."},
+{id:"d2",t:"mat2",r:1050,fen:"7k/8/8/6K1/8/8/8/R7 w - - 0 1",line:["Kg6","Kg8","Ra8#"],x:"Le roi est aussi un guerrier : il s'approche pour garder les cases de fuite, puis la tour donne mat."},
+{id:"d3",t:"mat2",r:1100,fen:"k7/8/2K5/8/8/8/8/1R6 w - - 0 1",line:["Kc7","Ka7","Ra1#"],x:"Ton roi verrouille b7 et b8. Le roi noir n'a plus que a7, et la tour l'attend sur la colonne a."}
+];
+const GRADES=[[0,"Page"],[50,"Écuyer"],[150,"Chevalier"],[300,"Chevalier banneret"],[500,"Baron"],[800,"Comte"],[1200,"Duc"]];
+const GLY={k:"♚",q:"♛",r:"♜",b:"♝",n:"♞",p:"♟︎"};
+const $=id=>document.getElementById(id);
+
+/* ---------- Sauvegarde (sur cet appareil) ---------- */
+const DEF={nom:"",xp:0,cote:600,serie:0,best:0,reussi:0,th:{},hist:[],vus:[],son:true};
+let S=Object.assign({},DEF);
+try{const raw=localStorage.getItem("salle-armes-v1");if(raw)S=Object.assign({},DEF,JSON.parse(raw));}catch(e){}
+function save(){try{localStorage.setItem("salle-armes-v1",JSON.stringify(S));}catch(e){}}
+
+/* ---------- Sons (synthétisés) ---------- */
+let AC=null;
+function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}return AC;}
+function tone(f,d,type,vol,when=0){const a=ac();if(!a||!S.son)return;const t=a.currentTime+when,o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g).connect(a.destination);o.start(t);o.stop(t+d);}
+const SON={
+  coup(){tone(180,.08,"triangle",.25);tone(90,.1,"sine",.2)},
+  prise(){[523,1046,1568,2090].forEach((f,i)=>tone(f*1.01,.5-i*.08,"sine",.12));tone(140,.15,"square",.08)},
+  victoire(){[523,659,784,1046].forEach((f,i)=>tone(f,.35,"triangle",.18,i*.11))},
+  rate(){tone(220,.25,"sawtooth",.08);tone(165,.4,"sawtooth",.08,.18)}
+};
+
+/* ---------- Étincelles ---------- */
+const fx=$("fx"),cx=fx.getContext("2d");let parts=[],anim=false;
+function sizeFx(){fx.width=innerWidth*devicePixelRatio;fx.height=innerHeight*devicePixelRatio;}
+addEventListener("resize",sizeFx);sizeFx();
+function burst(x,y,n,cols){if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,v=2+Math.random()*7;parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-3,l:1,c:cols[i%cols.length],s:2+Math.random()*4});}
+  if(!anim){anim=true;requestAnimationFrame(step);}}
+function step(){cx.clearRect(0,0,fx.width,fx.height);const k=devicePixelRatio;
+  parts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.25;p.l-=.018;cx.globalAlpha=Math.max(p.l,0);cx.fillStyle=p.c;cx.beginPath();cx.arc(p.x*k,p.y*k,p.s*k,0,7);cx.fill();});
+  parts=parts.filter(p=>p.l>0);if(parts.length)requestAnimationFrame(step);else{anim=false;cx.clearRect(0,0,fx.width,fx.height);}}
+function burstAt(el,n,cols){const r=el.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2,n,cols);}
+
+/* ---------- Échiquier ---------- */
+const B=$("board");let G,PZ,flip=false,sel=null,step_=0,etat="jeu",indice=0,pieces={};
+const files="abcdefgh";
+function xy(sq){let f=files.indexOf(sq[0]),r=8-+sq[1];if(flip){f=7-f;r=7-r;}return[f,r];}
+function draw(){
+  B.innerHTML="";pieces={};
+  for(let r=0;r<8;r++)for(let f=0;f<8;f++){
+    const ff=flip?7-f:f,rr=flip?7-r:r,sq=files[ff]+(8-rr);
+    const d=document.createElement("div");d.className="sq "+((ff+rr)%2?"d":"l");d.dataset.sq=sq;
+    d.style.left=f*12.5+"%";d.style.top=r*12.5+"%";
+    if(f===0)d.innerHTML+=`<span class="co r">${8-rr}</span>`;
+    if(r===7)d.innerHTML+=`<span class="co f">${files[ff]}</span>`;
+    B.appendChild(d);}
+  const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");svg.setAttribute("class","fleches");svg.setAttribute("viewBox","0 0 8 8");svg.id="fl";
+  svg.innerHTML='<defs><marker id="pt" markerWidth="3" markerHeight="3" refX="1.6" refY="1.5" orient="auto"><path d="M0,0L3,1.5L0,3z" fill="#2f8f5b"/></marker></defs>';
+  B.appendChild(svg);
+  for(const row of G.board())for(const p of row)if(p)addPiece(p.square,p);
+}
+function addPiece(sq,p){const e=document.createElement("div");e.className="pc "+p.color;e.innerHTML=`<span>${GLY[p.type]}</span>`;place(e,sq);B.appendChild(e);pieces[sq]=e;}
+function place(e,sq){const[f,r]=xy(sq);e.style.transform=`translate(${f*100}%,${r*100}%)`;}
+function sqEl(sq){return B.querySelector(`.sq[data-sq="${sq}"]`);}
+function clearMarks(){B.querySelectorAll(".sq").forEach(s=>{s.classList.remove("sel","hint");s.querySelectorAll(".dot,.ring").forEach(x=>x.remove());});}
+function markLast(m){B.querySelectorAll(".sq.last").forEach(s=>s.classList.remove("last"));sqEl(m.from).classList.add("last");sqEl(m.to).classList.add("last");}
+function arrow(from,to){const[a,b]=xy(from),[c,d]=xy(to);const l=document.createElementNS("http://www.w3.org/2000/svg","line");
+  l.setAttribute("x1",a+.5);l.setAttribute("y1",b+.5);l.setAttribute("x2",c+.5);l.setAttribute("y2",d+.5);l.setAttribute("stroke","#2f8f5b");l.setAttribute("stroke-width",".2");l.setAttribute("stroke-linecap","round");l.setAttribute("opacity",".9");l.setAttribute("marker-end","url(#pt)");$("fl").appendChild(l);}
+function clearArrows(){const f=$("fl");if(f)f.querySelectorAll("line").forEach(l=>l.remove());}
+
+function animMove(m){
+  const e=pieces[m.from];
+  let capSq=m.captured?(m.flags.includes("e")?m.to[0]+m.from[1]:m.to):null;
+  if(capSq&&pieces[capSq]){const c=pieces[capSq];delete pieces[capSq];c.classList.add("out");const[f,r]=xy(capSq);c.style.transform=`translate(${f*100}%,${r*100-60}%) rotate(${Math.random()<.5?-40:40}deg) scale(.6)`;setTimeout(()=>c.remove(),520);
+    setTimeout(()=>burstAt(sqEl(m.to),22,["#e3b84b","#f3dc94","#ffffff"]),180);SON.prise();} else SON.coup();
+  delete pieces[m.from];pieces[m.to]=e;place(e,m.to);
+  if(m.flags.includes("k")||m.flags.includes("q")){const rk=m.color==="w"?"1":"8",[rf,rt]=m.flags.includes("k")?["h","f"]:["a","d"];const re=pieces[rf+rk];delete pieces[rf+rk];pieces[rt+rk]=re;place(re,rt+rk);}
+  if(m.promotion){setTimeout(()=>{e.innerHTML=`<span>${GLY[m.promotion]}</span>`;},300);}
+  markLast(m);
+}
+
+/* ---------- Logique d'épreuve ---------- */
+function joueur(){return new Chess(PZ.fen).turn();}
+function forcedMate1(g){ // après le coup du joueur : chaque réponse laisse un mat en 1
+  const rep=g.moves();if(!rep.length)return g.in_checkmate();
+  return rep.every(r=>{g.move(r);const ok=g.moves().some(m=>{g.move(m);const k=g.in_checkmate();g.undo();return k;});g.undo();return ok;});
+}
+function accepte(san){
+  const mate=PZ.t==="mat1"||PZ.t==="mat2";
+  const restant=PZ.line.length-step_; // coups restants dans la ligne
+  if(!mate)return san===PZ.line[step_];
+  G.move(san);let ok;
+  if(G.in_checkmate())ok=true; else if(restant>=3)ok=forcedMate1(G); else ok=false;
+  G.undo();return ok;
+}
+function choisir(){
+  const filtre=$("chips").dataset.f||"tous";
+  let pool=P.filter(p=>filtre==="tous"||p.t===filtre);
+  const recents=S.vus.slice(-Math.min(8,pool.length-1));
+  let c=pool.filter(p=>!recents.includes(p.id));if(!c.length)c=pool;
+  c.sort((a,b)=>Math.abs(a.r-S.cote)+Math.random()*180-(Math.abs(b.r-S.cote)+Math.random()*180));
+  return c[0];
+}
+function charger(p){
+  PZ=p;G=new Chess(p.fen);flip=G.turn()==="b";sel=null;step_=0;etat="jeu";indice=0;
+  draw();clearArrows();
+  const blanc=G.turn()==="w";
+  $("trait").className="trait "+(blanc?"w":"b");
+  const butM={mat1:"Donne échec et mat en un coup.",mat2:"Échec et mat en deux coups.",fourchette:"Trouve le coup qui attaque deux pièces à la fois.",prise:"Une pièce est en danger… laquelle ?",enfilade:"Attaque une pièce pour gagner celle qui est derrière.",clouage:"Immobilise une pièce adverse."}[p.t];
+  $("mTitre").textContent=(blanc?"Les blancs":"Les noirs")+" jouent";$("mTexte").textContent=butM;$("mTheme").textContent=THEMES[p.t];
+  $("parch").innerHTML=`<p>Tu joues les <b>${blanc?"blancs":"noirs"}</b>. Touche une pièce, puis la case où tu veux la jouer.</p>`;
+  $("sceau").className="sceau";
+  $("bIndice").disabled=false;$("bSolution").disabled=false;
+}
+function tap(sq){
+  if(etat!=="jeu")return;
+  const p=G.get(sq);
+  if(sel&&sel!==sq){
+    const mv=G.moves({square:sel,verbose:true}).find(m=>m.to===sq);
+    if(mv){jouer(mv);return;}
+  }
+  clearMarks();
+  if(p&&p.color===G.turn()&&sel!==sq){
+    sel=sq;sqEl(sq).classList.add("sel");pieces[sq]&&pieces[sq].classList.add("up");setTimeout(()=>pieces[sq]&&pieces[sq].classList.remove("up"),260);
+    G.moves({square:sq,verbose:true}).forEach(m=>{const s=document.createElement("div");s.className=m.captured?"ring":"dot";sqEl(m.to).appendChild(s);});
+  } else sel=null;
+}
+function jouer(vm){
+  clearMarks();sel=null;
+  const san=G.move({from:vm.from,to:vm.to,promotion:"q"}).san;G.undo();
+  const ok=accepte(san);
+  const m=G.move({from:vm.from,to:vm.to,promotion:"q"});animMove(m);
+  if(!ok){echec(m);return;}
+  step_++;
+  if(G.in_checkmate()||PZ.t!=="mat2"&&PZ.t!=="mat1"){reussite();return;}
+  // réponse adverse (mat en 2)
+  etat="attente";
+  setTimeout(()=>{let r=PZ.line[step_];let mv=r&&G.move(r);if(!mv){mv=G.move(G.moves()[0]);}animMove(mv);step_++;etat="jeu";
+    $("parch").innerHTML=`<p>L'adversaire répond. À toi de finir le travail !</p>`;},650);
+}
+function nomOuEcuyer(){return S.nom.trim()||"jeune écuyer";}
+function reussite(){
+  etat="fini";const gain=indice?5:10;
+  setTimeout(()=>{
+    SON.victoire();burstAt($("board"),70,["#e3b84b","#f3dc94","#2f8f5b","#ffffff","#b8343e"]);
+    $("sceauTxt").textContent=["Bravo !","Touché !","Superbe !","Victoire !"][Math.floor(Math.random()*4)];$("sceau").className="sceau on";
+    setTimeout(()=>$("sceau").className="sceau",1300);
+  },320);
+  bilan(true,gain);
+  $("parch").innerHTML=`<p><span class="ok">Bien joué, ${esc(nomOuEcuyer())} ! +${gain} XP</span><br>${PZ.x}</p>`;
+  $("bIndice").disabled=true;$("bSolution").disabled=true;
+}
+function echec(m){
+  etat="fini";SON.rate();
+  setTimeout(()=>{B.classList.add("shake");setTimeout(()=>B.classList.remove("shake"),420);
+    $("sceauTxt").textContent="Pas cette fois";$("sceau").className="sceau on rate";setTimeout(()=>$("sceau").className="sceau",1100);},300);
+  setTimeout(()=>{G=new Chess(PZ.fen);for(let i=0;i<step_;i++)G.move(PZ.line[i]);draw();montrerSolution(false);},1200);
+  bilan(false,0);
+  $("parch").innerHTML=`<p><span class="ko">Ce coup (${m.san}) ne marche pas.</span> Regarde la flèche verte : c'est le bon coup.<br>${PZ.x}</p>`;
+  $("bIndice").disabled=true;$("bSolution").disabled=true;
+}
+function montrerSolution(rejouer){
+  const g=new Chess(G.fen());const mv=g.move(PZ.line[step_]);if(!mv)return;
+  clearArrows();arrow(mv.from,mv.to);sqEl(mv.from).classList.add("hint");
+  if(rejouer){etat="fini";setTimeout(()=>{const m=G.move(PZ.line[step_]);animMove(m);step_++;
+      const n=PZ.line[step_];if(n){setTimeout(()=>{const r=G.move(n);if(r){animMove(r);step_++;}const f=PZ.line[step_];if(f)setTimeout(()=>{const z=G.move(f);if(z)animMove(z);},700);},700);}
+    },700);}
+}
+function bilan(ok,gain){
+  const exp=1/(1+Math.pow(10,(PZ.r-S.cote)/400));const score=ok?(indice?.6:1):0;
+  S.cote=Math.round(Math.max(200,S.cote+32*(score-exp)));
+  S.xp+=gain;if(ok){S.reussi++;S.serie++;S.best=Math.max(S.best,S.serie);}else S.serie=0;
+  const t=S.th[PZ.t]||{ok:0,n:0};t.n++;if(ok)t.ok++;S.th[PZ.t]=t;
+  S.vus.push(PZ.id);S.vus=S.vus.slice(-30);
+  S.hist.unshift({id:PZ.id,t:PZ.t,ok,d:Date.now()});S.hist=S.hist.slice(0,12);
+  save();majEntete();
+}
+function gradeDe(xp){let g=GRADES[0],n=null;for(let i=0;i<GRADES.length;i++){if(xp>=GRADES[i][0]){g=GRADES[i];n=GRADES[i+1]||null;}}return[g,n];}
+function majEntete(){
+  const[g,n]=gradeDe(S.xp);
+  $("gradeTop").textContent=g[1];$("xpTxt").textContent=S.xp+" XP";
+  $("xpBar").style.width=(n?Math.round((S.xp-g[0])/(n[0]-g[0])*100):100)+"%";
+  $("salut").textContent=S.nom.trim()?`En garde, ${S.nom.trim()} !`:"Entraîne-toi, jeune écuyer";
+}
+function majBlason(){
+  const[g,n]=gradeDe(S.xp);
+  $("gGrade").textContent=g[1];$("gProchain").textContent=n?`Encore ${n[0]-S.xp} XP pour devenir ${n[1]}`:"Grade le plus haut atteint !";
+  $("nom").value=S.nom;$("sReussi").textContent=S.reussi;$("sSerie").textContent=S.best;$("sCote").textContent=S.cote;
+  $("themes").innerHTML=Object.keys(THEMES).map(k=>{const t=S.th[k]||{ok:0,n:0};const pc=t.n?Math.round(t.ok/t.n*100):0;
+    return `<div class="th"><span>${THEMES[k]}</span><em>${t.ok}/${t.n}</em><div class="bar"><i style="width:${pc}%"></i></div></div>`;}).join("");
+  $("hist").innerHTML=S.hist.length?S.hist.map(h=>`<div><span>${THEMES[h.t]}</span><span style="color:${h.ok?"#9be3b8":"#ffb3b8"}">${h.ok?"Réussi":"Raté"}</span></div>`).join(""):'<p class="note">Aucune épreuve pour l\'instant. Va à la salle d\'armes !</p>';
+}
+function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+
+/* ---------- Interface ---------- */
+B.addEventListener("click",e=>{const r=B.getBoundingClientRect();let f=Math.floor((e.clientX-r.left)/r.width*8),rr=Math.floor((e.clientY-r.top)/r.height*8);
+  if(f<0||f>7||rr<0||rr>7)return;if(flip){f=7-f;rr=7-rr;}ac();tap(files[f]+(8-rr));});
+$("bSuivant").onclick=()=>{ac();charger(choisir());};
+$("bIndice").onclick=()=>{if(etat!=="jeu")return;indice++;const g=new Chess(G.fen());const mv=g.move(PZ.line[step_]);
+  if(indice===1){clearMarks();sqEl(mv.from).classList.add("hint");$("parch").innerHTML=`<p>Indice : la pièce qui brille est celle à jouer.</p>`;}
+  else{clearArrows();arrow(mv.from,mv.to);$("parch").innerHTML=`<p>Dernier indice : suis la flèche !</p>`;$("bIndice").disabled=true;}};
+$("bSolution").onclick=()=>{if(etat!=="jeu")return;indice=2;bilan(false,0);$("parch").innerHTML=`<p><span class="ko">Voici la solution.</span><br>${PZ.x}</p>`;montrerSolution(true);$("bIndice").disabled=true;$("bSolution").disabled=true;};
+$("bSon").onclick=()=>{S.son=!S.son;save();$("bSon").textContent="Son : "+(S.son?"oui":"non");$("bSon").setAttribute("aria-pressed",S.son);};
+$("bSon").textContent="Son : "+(S.son?"oui":"non");
+$("nom").addEventListener("input",e=>{S.nom=e.target.value;save();majEntete();});
+function onglet(b){$("vSalle").hidden=b;$("vSalle").style.display=b?"none":"flex";$("vBlason").hidden=!b;$("tSalle").setAttribute("aria-current",!b);$("tBlason").setAttribute("aria-current",b);if(b)majBlason();scrollTo(0,0);}
+$("tSalle").onclick=()=>onglet(false);$("tBlason").onclick=()=>onglet(true);
+const ch=$("chips");ch.dataset.f="tous";
+ch.innerHTML=[["tous","Toutes les bottes"],...Object.entries(THEMES)].map(([k,v])=>`<button type="button" class="chip${k==="tous"?" on":""}" data-k="${k}">${v}</button>`).join("");
+ch.onclick=e=>{const b=e.target.closest(".chip");if(!b)return;ch.dataset.f=b.dataset.k;ch.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c===b));charger(choisir());};
+majEntete();charger(choisir());
+if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}
+</script>
+</body>
+</html>
