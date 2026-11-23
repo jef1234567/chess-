@@ -31,9 +31,12 @@ Légende : ✅ fait · 🔄 en cours · ⏳ à faire
 - ⏳ Essai sur la tablette ; calibrage des niveaux avec le joueur.
 - Terminé quand : une partie complète se joue sur la tablette sans saccade.
 
-## Lot 4 — Le conseil de guerre ⏳
-- Débrief hors ligne : le moteur repère les 2 ou 3 coups clés, les rejoue avec la flèche du meilleur coup et une phrase simple.
-- Parties sauvegardées dans le blason.
+## Lot 4 — Le conseil de guerre ✅ (sauf essai sur tablette)
+- ✅ Débrief hors ligne (`js/conseil.js`) : Stockfish à pleine force (profondeur 12) évalue chaque coup du joueur ; les 3 coups qui ont fait perdre le plus (au moins 1,2 pion) sont rejoués avec la flèche rouge (ton coup), la flèche verte (le meilleur) et une phrase simple (mat manqué, pièce laissée en prise, prise oubliée, échec possible).
+- ✅ Bouton « Montre le bon coup » qui joue le meilleur coup sur l'échiquier.
+- ✅ Les 20 dernières parties sont gardées dans le blason (« Mes parties ») avec un bouton « Conseil » ; sauvegarde migrée sans perte.
+- ✅ Testé dans Chromium : mat manqué bien repéré ; partie de 80 demi-coups analysée en 3 s avec un processeur ralenti 4 fois.
+- ⏳ Essai sur la tablette.
 
 ## Lot 5 — Mode connecté ⏳
 - Explications par l'API Claude, en mots d'enfant, sur le débrief et les épreuves ratées.

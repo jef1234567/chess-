@@ -16,7 +16,7 @@ const NOM_PIECE={p:"ton pion",n:"ton cavalier",b:"ton fou",r:"ta tour",q:"ta dam
 
 /* ---------- Moteur ---------- */
 const MOTEUR={
-  w:null,cb:null,score:null,ok:true,
+  w:null,cb:null,score:null,ok:true,ignorer:0, // ignorer : réponses de recherches arrêtées, à jeter
   demarrer(){
     if(this.w)return;
     try{
@@ -27,9 +27,10 @@ const MOTEUR={
     }catch(e){this.ok=false;}
   },
   recu(l){
+    if(this.ignorer>0&&!l.startsWith("bestmove"))return; // fin d'une recherche arrêtée
     const s=l.match(/ score (cp|mate) (-?\d+)/);
     if(s)this.score=s[1]==="cp"?+s[2]:(+s[2]>0?10000:-10000);
-    if(l.startsWith("bestmove")){const cb=this.cb;this.cb=null;if(cb)cb(l.split(" ")[1],this.score);}
+    if(l.startsWith("bestmove")){if(this.ignorer>0){this.ignorer--;return;}const cb=this.cb;this.cb=null;if(cb)cb(l.split(" ")[1],this.score);}
   },
   chercher(fen,niv,cb){
     this.demarrer();this.cb=cb;this.score=null;
@@ -37,7 +38,9 @@ const MOTEUR={
     this.w.postMessage(`position fen ${fen}`);
     this.w.postMessage(niv.ms?`go movetime ${niv.ms}`:`go depth ${niv.depth}`);
   },
-  stop(){if(this.w&&this.cb){this.cb=null;this.w.postMessage("stop");}}
+  stop(){if(this.w&&this.cb){this.cb=null;this.ignorer++;this.w.postMessage("stop");}},
+  // Analyse à pleine force : renvoie {coup (UCI), score (centipions, du point de vue du camp au trait)}.
+  analyser(fen,depth){return new Promise(ok=>this.chercher(fen,{skill:20,depth},(coup,score)=>ok({coup,score})));}
 };
 
 /* ---------- État de la partie ----------
@@ -139,14 +142,20 @@ function tFin(){
     const pourquoi=g.in_stalemate()?"pat : le roi ne peut plus bouger sans être en échec":g.in_threefold_repetition()?"la même position est revenue trois fois":g.insufficient_material()?"il ne reste pas assez de pièces pour faire mat":"règle des 50 coups";
     txt=`<span class="ok">Partie nulle (${pourquoi}). +${gain} XP</span>`;
   }
-  S.tournoi.bilan[T.niv.k]=b;S.xp+=gain;tSauver();majEntete();
+  S.tournoi.bilan[T.niv.k]=b;S.xp+=gain;tArchiver(g.in_checkmate()?(g.turn()!==T.camp?"victoire":"defaite"):"nulle");tSauver();majEntete();
   tMsg(txt);tEntete();$("tAbandon").disabled=true;
   return true;
+}
+// Partie terminée : gardée dans le blason (les 20 dernières) pour le conseil de guerre.
+function tArchiver(res){
+  if(T.g.history().length<2)return;
+  S.parties.unshift({d:Date.now(),niv:T.niv.k,camp:T.camp,coups:T.g.history(),res});S.parties=S.parties.slice(0,20);
+  $("tConseil").hidden=false;
 }
 function tAbandonner(){
   if(!T.g||T.etat==="fini")return;
   T.jeton++;MOTEUR.stop();T.etat="fini";
-  const b=S.tournoi.bilan[T.niv.k]||{v:0,n:0,d:0};b.d++;S.tournoi.bilan[T.niv.k]=b;tSauver();
+  const b=S.tournoi.bilan[T.niv.k]||{v:0,n:0,d:0};b.d++;S.tournoi.bilan[T.niv.k]=b;tArchiver("abandon");tSauver();
   tMsg(`Tu as abandonné. Ce n'est que partie remise !`);tEntete();$("tAbandon").disabled=true;
 }
 function tChoisir(){ // retour à l'écran de choix
@@ -160,7 +169,8 @@ function tChoisir(){ // retour à l'écran de choix
   cp.innerHTML=[["w","Les blancs"],["b","Les noirs"],["hasard","Au hasard"]].map(([k,v],i)=>`<button type="button" class="chip${i===0?" on":""}" data-k="${k}">${v}</button>`).join("");
   const radio=el=>el.onclick=e=>{const b=e.target.closest(".chip");if(!b)return;el.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c===b));};
   radio(nv);radio(cp);
-  $("tGo").onclick=()=>{ac();MOTEUR.demarrer();tCommencer(nv.querySelector(".on").dataset.k,cp.querySelector(".on").dataset.k);$("tAbandon").disabled=false;};
+  $("tGo").onclick=()=>{ac();MOTEUR.demarrer();$("tConseil").hidden=true;tCommencer(nv.querySelector(".on").dataset.k,cp.querySelector(".on").dataset.k);$("tAbandon").disabled=false;};
   $("tNouvelle").onclick=()=>{T.jeton++;MOTEUR.stop();if(T.etat!=="fini"){T.etat="fini";S.tournoi.partie=null;save();}tChoisir();};
   $("tAbandon").onclick=tAbandonner;
+  $("tConseil").onclick=()=>conseilOuvrir(0);
 })();
