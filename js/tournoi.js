@@ -135,14 +135,14 @@ function tFin(){
   if(g.in_checkmate()){
     const gagne=g.turn()!==T.camp;
     if(gagne){b.v++;gain=T.niv.xp;txt=`<span class="ok">Victoire ! Tu as battu ${T.niv.nom}. +${gain} XP</span>`;
-      tPlus(()=>{SON.victoire();burstAt($("board"),80,["#e3b84b","#f3dc94","#2f8f5b","#ffffff","#b8343e"]);$("sceauTxt").textContent="Victoire !";$("sceau").className="sceau on";setTimeout(()=>$("sceau").className="sceau",1500);},350);}
+      tPlus(()=>{SON.victoire();confettis();sceau("Victoire !",false,1800);},900);}
     else{b.d++;txt=`<span class="ko">${T.niv.nom} a gagné cette fois.</span> Chaque défaite t'apprend quelque chose. Retente ta chance !`;}
   }else{
     b.n++;gain=Math.round(T.niv.xp/2);
     const pourquoi=g.in_stalemate()?"pat : le roi ne peut plus bouger sans être en échec":g.in_threefold_repetition()?"la même position est revenue trois fois":g.insufficient_material()?"il ne reste pas assez de pièces pour faire mat":"règle des 50 coups";
     txt=`<span class="ok">Partie nulle (${pourquoi}). +${gain} XP</span>`;
   }
-  S.tournoi.bilan[T.niv.k]=b;S.xp+=gain;tArchiver(g.in_checkmate()?(g.turn()!==T.camp?"victoire":"defaite"):"nulle");tSauver();majEntete();hautsVerifier();
+  S.tournoi.bilan[T.niv.k]=b;gagnerXP(gain);tArchiver(g.in_checkmate()?(g.turn()!==T.camp?"victoire":"defaite"):"nulle");tSauver();majEntete();hautsVerifier();
   tMsg(txt);tEntete();$("tAbandon").disabled=true;
   return true;
 }
