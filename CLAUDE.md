@@ -16,8 +16,8 @@ Jeu d'échecs d'entraînement pour un enfant de 8 ans qui joue déjà relativeme
 
 ## Architecture
 - `index.html` : squelette de la page ; charge `css/app.css` puis les scripts dans l'ordre ci-dessous (scripts classiques, sans module ni build).
-- `js/puzzles.js` (thèmes, problèmes), `js/profile.js` (grades, sauvegarde), `js/sound.js` (sons), `js/board.js` (échiquier, animations), `js/app.js` (logique d'épreuve, blason, interface).
-- `tools/verifier.js` : vérification des problèmes ; `tools/verifier-cache.js` : contrôle de la liste de `sw.js`. Lancés par `.github/workflows/verifier.yml`.
+- `js/puzzles.js` (thèmes, problèmes faits main), `js/lichess.js` (problèmes Lichess, généré par `tools/importer-lichess.js` via `.github/workflows/import-lichess.yml`, ne pas modifier à la main), `js/profile.js` (grades, sauvegarde), `js/sound.js` (sons), `js/board.js` (échiquier, animations), `js/app.js` (logique d'épreuve, blason, interface).
+- `tools/verif-lib.js` : règles de vérification partagées ; `tools/verifier.js` : vérification des problèmes ; `tools/verifier-cache.js` : contrôle de la liste de `sw.js`. Lancés par `.github/workflows/verifier.yml`.
 - `chess.js` : règles du jeu (chess.js 0.10.3, BSD-2), ne pas modifier.
 - `sw.js` + `manifest.webmanifest` : installation et cache hors ligne.
 - `fonts/`, `icons/` : ressources locales.

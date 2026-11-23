@@ -1,36 +1,68 @@
 /* Application : logique d'épreuve, blason et interface. */
 /* ---------- Logique d'épreuve ---------- */
-function joueur(){return new Chess(PZ.fen).turn();}
+// Une épreuve : PZ.line alterne les coups à partir du trait de PZ.fen. Si PZ.a vaut 1,
+// le premier coup est celui de l'adversaire et l'appli le joue toute seule (problèmes Lichess).
+const MATS=["mat1","mat2"];
+let partie=0; // change à chaque épreuve : les minuteries d'une ancienne épreuve s'annulent
+function plus(fn,ms){const n=partie;setTimeout(()=>{if(n===partie)fn();},ms);}
 function forcedMate1(g){ // après le coup du joueur : chaque réponse laisse un mat en 1
   const rep=g.moves();if(!rep.length)return g.in_checkmate();
   return rep.every(r=>{g.move(r);const ok=g.moves().some(m=>{g.move(m);const k=g.in_checkmate();g.undo();return k;});g.undo();return ok;});
 }
 function accepte(san){
-  const mate=PZ.t==="mat1"||PZ.t==="mat2";
-  const restant=PZ.line.length-step_; // coups restants dans la ligne
-  if(!mate)return san===PZ.line[step_];
-  G.move(san);let ok;
-  if(G.in_checkmate())ok=true; else if(restant>=3)ok=forcedMate1(G); else ok=false;
+  const restant=PZ.line.length-step_; // coups restants dans la ligne, celui-ci compris
+  G.move(san);const mat=G.in_checkmate();
+  let ok=san===PZ.line[step_]||mat; // un mat est toujours un bon coup
+  if(!ok&&MATS.includes(PZ.t)&&restant>=3)ok=forcedMate1(G);
   G.undo();return ok;
 }
+const BUT={mat1:"Donne échec et mat en un coup.",mat2:"Échec et mat en deux coups.",fourchette:"Trouve le coup qui attaque deux pièces à la fois.",
+  attaqueDouble:"Une seule pièce peut attaquer deux cibles. Trouve-la !",prise:"Une pièce est en danger… laquelle ?",enfilade:"Attaque une pièce pour gagner celle qui est derrière.",
+  clouage:"Immobilise une pièce adverse.",decouverte:"Bouge une pièce pour ouvrir la route d'une autre.",defense:"Danger ! Trouve le seul coup qui sauve.",finale:"Finale : trouve le coup précis."};
+
+/* Choix de l'épreuve : révision ciblée.
+   - Une épreuve ratée revient plus tard (liste S.aRevoir), une fois sur quatre environ.
+   - En mode « toutes les bottes », les thèmes les moins réussis sortent plus souvent.
+   - On évite les épreuves déjà réussies et celles vues récemment, tant qu'il en reste. */
+function tauxTheme(t){const s=S.th[t]||{ok:0,n:0};return (s.ok+1)/(s.n+2);}
+function tirage(poids){let tot=0;for(const[,w]of poids)tot+=w;let x=Math.random()*tot;for(const[k,w]of poids){x-=w;if(x<=0)return k;}return poids[poids.length-1][0];}
 function choisir(){
   const filtre=$("chips").dataset.f||"tous";
-  let pool=P.filter(p=>filtre==="tous"||p.t===filtre);
-  const recents=S.vus.slice(-Math.min(8,pool.length-1));
-  let c=pool.filter(p=>!recents.includes(p.id));if(!c.length)c=pool;
-  c.sort((a,b)=>Math.abs(a.r-S.cote)+Math.random()*180-(Math.abs(b.r-S.cote)+Math.random()*180));
-  return c[0];
+  const recents=new Set(S.vus.slice(-12));
+  const ok=p=>(filtre==="tous"||p.t===filtre)&&p.id!==(PZ&&PZ.id);
+  const revoir=S.aRevoir.map(id=>P.find(p=>p.id===id)).filter(p=>p&&ok(p)&&!recents.has(p.id));
+  if(revoir.length&&Math.random()<.25)return revoir[0];
+  let t=filtre;
+  if(filtre==="tous"){
+    const nb={};for(const p of P)nb[p.t]=(nb[p.t]||0)+1;
+    // de 0,4 (tout réussi) à 2 (tout raté), réduit pour un thème qui a peu d'épreuves
+    t=tirage(Object.keys(nb).map(k=>[k,(.4+(1-tauxTheme(k))*1.6)*Math.min(1,nb[k]/20)]));
+  }
+  const pool=P.filter(p=>p.t===t&&ok(p));
+  const faits=new Set(S.reussis);
+  let c=pool.filter(p=>!recents.has(p.id)&&!faits.has(p.id));
+  if(!c.length)c=pool.filter(p=>!recents.has(p.id));
+  if(!c.length)c=pool.length?pool:P;
+  // proche de la cote du joueur, avec un peu de hasard
+  let best=null,bs=Infinity;for(const p of c){const s=Math.abs(p.r-S.cote)+Math.random()*180;if(s<bs){bs=s;best=p;}}
+  return best;
 }
 function charger(p){
-  PZ=p;G=new Chess(p.fen);flip=G.turn()==="b";sel=null;step_=0;etat="jeu";indice=0;
+  partie++;
+  PZ=p;G=new Chess(p.fen);sel=null;step_=0;indice=0;
+  const camp=p.a?(G.turn()==="w"?"b":"w"):G.turn();
+  flip=camp==="b";etat=p.a?"attente":"jeu";
   draw();clearArrows();
-  const blanc=G.turn()==="w";
+  const blanc=camp==="w";
   $("trait").className="trait "+(blanc?"w":"b");
-  const butM={mat1:"Donne échec et mat en un coup.",mat2:"Échec et mat en deux coups.",fourchette:"Trouve le coup qui attaque deux pièces à la fois.",prise:"Une pièce est en danger… laquelle ?",enfilade:"Attaque une pièce pour gagner celle qui est derrière.",clouage:"Immobilise une pièce adverse."}[p.t];
-  $("mTitre").textContent=(blanc?"Les blancs":"Les noirs")+" jouent";$("mTexte").textContent=butM;$("mTheme").textContent=THEMES[p.t];
-  $("parch").innerHTML=`<p>Tu joues les <b>${blanc?"blancs":"noirs"}</b>. Touche une pièce, puis la case où tu veux la jouer.</p>`;
+  $("mTitre").textContent=(blanc?"Les blancs":"Les noirs")+" jouent";$("mTexte").textContent=BUT[p.t]||"";$("mTheme").textContent=THEMES[p.t];
   $("sceau").className="sceau";
-  $("bIndice").disabled=false;$("bSolution").disabled=false;
+  $("bIndice").disabled=!!p.a;$("bSolution").disabled=!!p.a;
+  if(p.a){
+    $("parch").innerHTML=`<p>Tu joues les <b>${blanc?"blancs":"noirs"}</b>. Regarde bien le coup de l'adversaire…</p>`;
+    plus(()=>{const m=G.move(PZ.line[0]);animMove(m);step_=1;etat="jeu";$("bIndice").disabled=false;$("bSolution").disabled=false;
+      $("parch").innerHTML=`<p>L'adversaire a joué <b>${m.san}</b>. À toi ! Touche une pièce, puis la case où tu veux la jouer.</p>`;},700);
+  } else $("parch").innerHTML=`<p>Tu joues les <b>${blanc?"blancs":"noirs"}</b>. Touche une pièce, puis la case où tu veux la jouer.</p>`;
 }
 function tap(sq){
   if(etat!=="jeu")return;
@@ -52,11 +84,11 @@ function jouer(vm){
   const m=G.move({from:vm.from,to:vm.to,promotion:"q"});animMove(m);
   if(!ok){echec(m);return;}
   step_++;
-  if(G.in_checkmate()||PZ.t!=="mat2"&&PZ.t!=="mat1"){reussite();return;}
-  // réponse adverse (mat en 2)
+  if(G.in_checkmate()||step_>=PZ.line.length){reussite();return;}
+  // réponse de l'adversaire : celle de la ligne si elle est jouable, sinon un coup légal
   etat="attente";
-  setTimeout(()=>{let r=PZ.line[step_];let mv=r&&G.move(r);if(!mv){mv=G.move(G.moves()[0]);}animMove(mv);step_++;etat="jeu";
-    $("parch").innerHTML=`<p>L'adversaire répond. À toi de finir le travail !</p>`;},650);
+  plus(()=>{const r=PZ.line[step_];let mv=r&&G.move(r);if(!mv){mv=G.move(G.moves()[0]);}animMove(mv);step_++;etat="jeu";
+    $("parch").innerHTML=`<p>L'adversaire répond <b>${mv.san}</b>. Continue, tu y es presque !</p>`;},650);
 }
 function nomOuEcuyer(){return S.nom.trim()||"jeune écuyer";}
 function reussite(){
@@ -74,7 +106,7 @@ function echec(m){
   etat="fini";SON.rate();
   setTimeout(()=>{B.classList.add("shake");setTimeout(()=>B.classList.remove("shake"),420);
     $("sceauTxt").textContent="Pas cette fois";$("sceau").className="sceau on rate";setTimeout(()=>$("sceau").className="sceau",1100);},300);
-  setTimeout(()=>{G=new Chess(PZ.fen);for(let i=0;i<step_;i++)G.move(PZ.line[i]);draw();montrerSolution(false);},1200);
+  plus(()=>{G=new Chess(PZ.fen);for(let i=0;i<step_;i++)G.move(PZ.line[i]);draw();montrerSolution(false);},1200);
   bilan(false,0);
   $("parch").innerHTML=`<p><span class="ko">Ce coup (${m.san}) ne marche pas.</span> Regarde la flèche verte : c'est le bon coup.<br>${PZ.x}</p>`;
   $("bIndice").disabled=true;$("bSolution").disabled=true;
@@ -82,9 +114,7 @@ function echec(m){
 function montrerSolution(rejouer){
   const g=new Chess(G.fen());const mv=g.move(PZ.line[step_]);if(!mv)return;
   clearArrows();arrow(mv.from,mv.to);sqEl(mv.from).classList.add("hint");
-  if(rejouer){etat="fini";setTimeout(()=>{const m=G.move(PZ.line[step_]);animMove(m);step_++;
-      const n=PZ.line[step_];if(n){setTimeout(()=>{const r=G.move(n);if(r){animMove(r);step_++;}const f=PZ.line[step_];if(f)setTimeout(()=>{const z=G.move(f);if(z)animMove(z);},700);},700);}
-    },700);}
+  if(rejouer){etat="fini";const suite=()=>{const c=PZ.line[step_];if(!c)return;const m=G.move(c);if(!m)return;animMove(m);step_++;plus(suite,700);};plus(suite,700);}
 }
 function bilan(ok,gain){
   const exp=1/(1+Math.pow(10,(PZ.r-S.cote)/400));const score=ok?(indice?.6:1):0;
@@ -92,6 +122,10 @@ function bilan(ok,gain){
   S.xp+=gain;if(ok){S.reussi++;S.serie++;S.best=Math.max(S.best,S.serie);}else S.serie=0;
   const t=S.th[PZ.t]||{ok:0,n:0};t.n++;if(ok)t.ok++;S.th[PZ.t]=t;
   S.vus.push(PZ.id);S.vus=S.vus.slice(-30);
+  // révision : une épreuve ratée revient plus tard ; réussie (sans solution), elle sort de la liste
+  S.aRevoir=S.aRevoir.filter(id=>id!==PZ.id);
+  if(!ok||indice>=2)S.aRevoir.push(PZ.id);S.aRevoir=S.aRevoir.slice(-50);
+  if(ok&&!S.reussis.includes(PZ.id))S.reussis.push(PZ.id);
   S.hist.unshift({id:PZ.id,t:PZ.t,ok,d:Date.now()});S.hist=S.hist.slice(0,12);
   save();majEntete();
 }
