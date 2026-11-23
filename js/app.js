@@ -144,6 +144,9 @@ function majBlason(){
     return `<div class="th"><span>${THEMES[k]}</span><em>${t.ok}/${t.n}</em><div class="bar"><i style="width:${pc}%"></i></div></div>`;}).join("");
   $("tBilan").innerHTML=NIVEAUX.map(n=>{const b=S.tournoi.bilan[n.k]||{v:0,n:0,d:0};
     return `<div class="th"><span>${n.nom}</span><em>${b.v} victoire${b.v>1?"s":""} · ${b.n} nulle${b.n>1?"s":""} · ${b.d} défaite${b.d>1?"s":""}</em></div>`;}).join("");
+  const RES={victoire:["Victoire","#9be3b8"],defaite:["Défaite","#ffb3b8"],nulle:["Nulle","#f3dc94"],abandon:["Abandon","#ffb3b8"]};
+  $("parties").innerHTML=S.parties.length?S.parties.map((p,i)=>{const n=NIVEAUX.find(x=>x.k===p.niv)||NIVEAUX[0];const r=RES[p.res]||["?","#fff"];
+    return `<div><span>${new Date(p.d).toLocaleDateString("fr-FR",{day:"numeric",month:"short"})} · ${n.nom} · <b style="color:${r[1]}">${r[0]}</b></span><button type="button" class="petit" data-p="${i}">Conseil</button></div>`;}).join(""):'<p class="note">Aucune partie pour l\'instant. Va au tournoi !</p>';
   $("hist").innerHTML=S.hist.length?S.hist.map(h=>`<div><span>${THEMES[h.t]}</span><span style="color:${h.ok?"#9be3b8":"#ffb3b8"}">${h.ok?"Réussi":"Raté"}</span></div>`).join(""):'<p class="note">Aucune épreuve pour l\'instant. Va à la salle d\'armes !</p>';
 }
 function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
@@ -164,7 +167,7 @@ let mode="salle";
 function onglet(v){
   if(v===mode&&v!=="blason"){scrollTo(0,0);return;}
   if(mode==="salle"){partie++;} // les minuteries d'épreuve en cours s'annulent
-  if(mode==="tournoi"){T.jeton++;MOTEUR.stop();} // la réflexion de l'adversaire reprendra au retour
+  if(mode==="tournoi"){if(!$("cJeu").hidden)cQuitter();T.jeton++;MOTEUR.stop();} // la réflexion de l'adversaire reprendra au retour
   mode=v;
   for(const[k,id,t]of[["salle","vSalle","tSalle"],["tournoi","vTournoi","tTournoiB"],["blason","vBlason","tBlason"]]){
     $(id).hidden=k!==v;$(t).setAttribute("aria-current",k===v);}
@@ -181,6 +184,7 @@ function onglet(v){
   }else majBlason();
   scrollTo(0,0);
 }
+$("parties").onclick=e=>{const b=e.target.closest("button[data-p]");if(b)conseilOuvrir(+b.dataset.p);};
 $("tSalle").onclick=()=>onglet("salle");$("tTournoiB").onclick=()=>onglet("tournoi");$("tBlason").onclick=()=>onglet("blason");
 const ch=$("chips");ch.dataset.f="tous";
 ch.innerHTML=[["tous","Toutes les bottes"],...Object.entries(THEMES)].map(([k,v])=>`<button type="button" class="chip${k==="tous"?" on":""}" data-k="${k}">${v}</button>`).join("");

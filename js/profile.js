@@ -5,11 +5,12 @@ const GRADES=[[0,"Page"],[50,"Écuyer"],[150,"Chevalier"],[300,"Chevalier banner
 // Format v1 (lot 0) : nom, xp, cote, serie, best, reussi, th, hist, vus, son.
 // Ajouts du lot 2 : aRevoir (épreuves ratées à revoir), reussis (épreuves déjà réussies).
 // Ajout du lot 3 : tournoi {partie en cours, bilan par niveau}.
+// Ajout du lot 4 : parties (les 20 dernières parties du tournoi, pour le conseil de guerre).
 // Les anciennes données sont gardées telles quelles ; les champs absents prennent leur valeur par défaut.
-function defauts(){return {nom:"",xp:0,cote:600,serie:0,best:0,reussi:0,th:{},hist:[],vus:[],son:true,aRevoir:[],reussis:[],tournoi:{partie:null,bilan:{}}};}
+function defauts(){return {nom:"",xp:0,cote:600,serie:0,best:0,reussi:0,th:{},hist:[],vus:[],son:true,aRevoir:[],reussis:[],tournoi:{partie:null,bilan:{}},parties:[]};}
 function migrer(o){
   const d=defauts(),s=Object.assign(d,o&&typeof o==="object"?o:{});
-  for(const k of ["hist","vus","aRevoir","reussis"])if(!Array.isArray(s[k]))s[k]=[];
+  for(const k of ["hist","vus","aRevoir","reussis","parties"])if(!Array.isArray(s[k]))s[k]=[];
   if(!s.th||typeof s.th!=="object")s.th={};
   if(!s.tournoi||typeof s.tournoi!=="object")s.tournoi={};
   if(!s.tournoi.bilan||typeof s.tournoi.bilan!=="object")s.tournoi.bilan={};

@@ -28,7 +28,7 @@ function draw(){
     if(r===7)d.innerHTML+=`<span class="co f">${files[ff]}</span>`;
     B.appendChild(d);}
   const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");svg.setAttribute("class","fleches");svg.setAttribute("viewBox","0 0 8 8");svg.id="fl";
-  svg.innerHTML='<defs><marker id="pt" markerWidth="3" markerHeight="3" refX="1.6" refY="1.5" orient="auto"><path d="M0,0L3,1.5L0,3z" fill="#2f8f5b"/></marker></defs>';
+  svg.innerHTML='<defs><marker id="pt" markerWidth="3" markerHeight="3" refX="1.6" refY="1.5" orient="auto"><path d="M0,0L3,1.5L0,3z" fill="#2f8f5b"/></marker><marker id="ptr" markerWidth="3" markerHeight="3" refX="1.6" refY="1.5" orient="auto"><path d="M0,0L3,1.5L0,3z" fill="#b8343e"/></marker></defs>';
   B.appendChild(svg);
   // chess.js 0.10.3 ne fournit pas p.square : on calcule la case depuis la position dans le tableau.
   G.board().forEach((row,i)=>row.forEach((p,j)=>{if(p)addPiece(files[j]+(8-i),p);}));
@@ -38,8 +38,8 @@ function place(e,sq){const[f,r]=xy(sq);e.style.transform=`translate(${f*100}%,${
 function sqEl(sq){return B.querySelector(`.sq[data-sq="${sq}"]`);}
 function clearMarks(){B.querySelectorAll(".sq").forEach(s=>{s.classList.remove("sel","hint");s.querySelectorAll(".dot,.ring").forEach(x=>x.remove());});}
 function markLast(m){B.querySelectorAll(".sq.last").forEach(s=>s.classList.remove("last"));sqEl(m.from).classList.add("last");sqEl(m.to).classList.add("last");}
-function arrow(from,to){const[a,b]=xy(from),[c,d]=xy(to);const l=document.createElementNS("http://www.w3.org/2000/svg","line");
-  l.setAttribute("x1",a+.5);l.setAttribute("y1",b+.5);l.setAttribute("x2",c+.5);l.setAttribute("y2",d+.5);l.setAttribute("stroke","#2f8f5b");l.setAttribute("stroke-width",".2");l.setAttribute("stroke-linecap","round");l.setAttribute("opacity",".9");l.setAttribute("marker-end","url(#pt)");$("fl").appendChild(l);}
+function arrow(from,to,rouge){const[a,b]=xy(from),[c,d]=xy(to);const l=document.createElementNS("http://www.w3.org/2000/svg","line");
+  l.setAttribute("x1",a+.5);l.setAttribute("y1",b+.5);l.setAttribute("x2",c+.5);l.setAttribute("y2",d+.5);l.setAttribute("stroke",rouge?"#b8343e":"#2f8f5b");l.setAttribute("stroke-width",".2");l.setAttribute("stroke-linecap","round");l.setAttribute("opacity",".9");l.setAttribute("marker-end",rouge?"url(#ptr)":"url(#pt)");$("fl").appendChild(l);}
 function clearArrows(){const f=$("fl");if(f)f.querySelectorAll("line").forEach(l=>l.remove());}
 
 function animMove(m){
