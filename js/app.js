@@ -65,11 +65,12 @@ function charger(p){
   } else $("parch").innerHTML=`<p>Tu joues les <b>${blanc?"blancs":"noirs"}</b>. Touche une pièce, puis la case où tu veux la jouer.</p>`;
 }
 function tap(sq){
-  if(etat!=="jeu")return;
+  const tournoi=mode==="tournoi";
+  if(tournoi?!tPeutJouer():etat!=="jeu")return;
   const p=G.get(sq);
   if(sel&&sel!==sq){
     const mv=G.moves({square:sel,verbose:true}).find(m=>m.to===sq);
-    if(mv){jouer(mv);return;}
+    if(mv){(tournoi?tJouer:jouer)(mv);return;}
   }
   clearMarks();
   if(p&&p.color===G.turn()&&sel!==sq){
@@ -141,6 +142,8 @@ function majBlason(){
   $("nom").value=S.nom;$("sReussi").textContent=S.reussi;$("sSerie").textContent=S.best;$("sCote").textContent=S.cote;
   $("themes").innerHTML=Object.keys(THEMES).map(k=>{const t=S.th[k]||{ok:0,n:0};const pc=t.n?Math.round(t.ok/t.n*100):0;
     return `<div class="th"><span>${THEMES[k]}</span><em>${t.ok}/${t.n}</em><div class="bar"><i style="width:${pc}%"></i></div></div>`;}).join("");
+  $("tBilan").innerHTML=NIVEAUX.map(n=>{const b=S.tournoi.bilan[n.k]||{v:0,n:0,d:0};
+    return `<div class="th"><span>${n.nom}</span><em>${b.v} victoire${b.v>1?"s":""} · ${b.n} nulle${b.n>1?"s":""} · ${b.d} défaite${b.d>1?"s":""}</em></div>`;}).join("");
   $("hist").innerHTML=S.hist.length?S.hist.map(h=>`<div><span>${THEMES[h.t]}</span><span style="color:${h.ok?"#9be3b8":"#ffb3b8"}">${h.ok?"Réussi":"Raté"}</span></div>`).join(""):'<p class="note">Aucune épreuve pour l\'instant. Va à la salle d\'armes !</p>';
 }
 function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
@@ -156,10 +159,32 @@ $("bSolution").onclick=()=>{if(etat!=="jeu")return;indice=2;bilan(false,0);$("pa
 $("bSon").onclick=()=>{S.son=!S.son;save();$("bSon").textContent="Son : "+(S.son?"oui":"non");$("bSon").setAttribute("aria-pressed",S.son);};
 $("bSon").textContent="Son : "+(S.son?"oui":"non");
 $("nom").addEventListener("input",e=>{S.nom=e.target.value;save();majEntete();});
-function onglet(b){$("vSalle").hidden=b;$("vSalle").style.display=b?"none":"flex";$("vBlason").hidden=!b;$("tSalle").setAttribute("aria-current",!b);$("tBlason").setAttribute("aria-current",b);if(b)majBlason();scrollTo(0,0);}
-$("tSalle").onclick=()=>onglet(false);$("tBlason").onclick=()=>onglet(true);
+/* Onglets. L'échiquier est partagé : il passe d'un onglet à l'autre avec sa partie. */
+let mode="salle";
+function onglet(v){
+  if(v===mode&&v!=="blason"){scrollTo(0,0);return;}
+  if(mode==="salle"){partie++;} // les minuteries d'épreuve en cours s'annulent
+  if(mode==="tournoi"){T.jeton++;MOTEUR.stop();} // la réflexion de l'adversaire reprendra au retour
+  mode=v;
+  for(const[k,id,t]of[["salle","vSalle","tSalle"],["tournoi","vTournoi","tTournoiB"],["blason","vBlason","tBlason"]]){
+    $(id).hidden=k!==v;$(t).setAttribute("aria-current",k===v);}
+  $("vSalle").style.display=v==="salle"?"flex":"none";
+  clearMarks();sel=null;
+  if(v==="salle"){
+    $("sSlot").appendChild($("plateau"));
+    if(etat==="attente")charger(PZ); // une réponse adverse était en route : on reprend l'épreuve
+    else{G=new Chess(PZ.fen);for(let i=0;i<step_;i++)G.move(PZ.line[i]);flip=(PZ.a?(new Chess(PZ.fen).turn()==="w"?"b":"w"):new Chess(PZ.fen).turn())==="b";draw();}
+  }else if(v==="tournoi"){
+    $("tSlot").appendChild($("plateau"));
+    MOTEUR.demarrer();tAfficher();tEntete();
+    if(T.g&&T.etat==="pense")tAdversaire(); // la réflexion avait été interrompue
+  }else majBlason();
+  scrollTo(0,0);
+}
+$("tSalle").onclick=()=>onglet("salle");$("tTournoiB").onclick=()=>onglet("tournoi");$("tBlason").onclick=()=>onglet("blason");
 const ch=$("chips");ch.dataset.f="tous";
 ch.innerHTML=[["tous","Toutes les bottes"],...Object.entries(THEMES)].map(([k,v])=>`<button type="button" class="chip${k==="tous"?" on":""}" data-k="${k}">${v}</button>`).join("");
 ch.onclick=e=>{const b=e.target.closest(".chip");if(!b)return;ch.dataset.f=b.dataset.k;ch.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c===b));charger(choisir());};
 majEntete();charger(choisir());
+if(tReprendre()){tMsg(`Ta partie contre <b>${T.niv.nom}</b> t'attend. À toi de jouer !`);}
 if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}

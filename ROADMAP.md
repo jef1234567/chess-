@@ -22,9 +22,13 @@ Légende : ✅ fait · 🔄 en cours · ⏳ à faire
 - ⏳ Confirmer la fluidité sur la vraie tablette (après publication).
 - Terminé quand : au moins 2 000 problèmes vérifiés, chargés hors ligne sans ralentir la tablette.
 
-## Lot 3 — Le tournoi ⏳
-- Partie contre Stockfish (version WebAssembly, hors ligne) à niveaux nommés : Page, Écuyer, Chevalier, Baron, Duc.
-- Adversaire qui commente brièvement ses coups.
+## Lot 3 — Le tournoi ✅ (sauf essai sur tablette)
+- ✅ Onglet « Tournoi » : partie contre Stockfish 19 lite (WebAssembly, un seul fil, 1,8 Mo, hors ligne) dans un Web Worker. Projet passé sous GPL-3 (choix de Jean-François, 23/11/2026).
+- ✅ Niveaux Page, Écuyer, Chevalier, Baron, Duc : « Skill Level », profondeur et part de coups au hasard (réglages de départ, à ajuster avec le joueur).
+- ✅ L'adversaire commente brièvement ses coups (prises, échecs, roque, et réaction quand l'évaluation bascule).
+- ✅ Partie en cours gardée sur l'appareil et reprise au retour ; bilan par niveau dans le blason ; XP pour victoires et nulles.
+- ✅ Testé dans Chromium : partie complète jusqu'au mat (90 demi-coups), réponse de l'adversaire en moins de 0,7 s (Page) et 1 s (Duc), reprise après rechargement, changement d'onglet en pleine réflexion.
+- ⏳ Essai sur la tablette ; calibrage des niveaux avec le joueur.
 - Terminé quand : une partie complète se joue sur la tablette sans saccade.
 
 ## Lot 4 — Le conseil de guerre ⏳

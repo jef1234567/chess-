@@ -102,3 +102,8 @@ input{font:inherit;width:100%;padding:10px 12px;border-radius:10px;border:1px so
 .note{font-size:.8rem;color:var(--texte-doux)}
 canvas.fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9}
 @media (prefers-reduced-motion:reduce){.pc,.pc.out,.sceau div{transition:none}.board.shake,.sq.hint{animation:none}}
+/* Tournoi (lot 3) */
+.chips.wrap{flex-wrap:wrap;overflow:visible;margin:8px 0 14px}
+.tournoi,.tjeu{display:flex;flex-direction:column;gap:14px}
+#tChoix .note{margin:0}
+#tGo{width:100%}
