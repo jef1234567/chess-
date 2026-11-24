@@ -5,6 +5,8 @@ const JEUX_PIECES={fantasy:"Fantaisie",celtic:"Celtiques",glyphes:"Classiques"};
 function pieceHTML(c,t){const j=S.pieces;
   return j&&j!=="glyphes"&&JEUX_PIECES[j]?`<img src="pieces/${j}/${c}${t.toUpperCase()}.svg" alt="" draggable="false">`:`<span>${GLY[t]}</span>`;}
 const $=id=>document.getElementById(id);
+// Notation française pour l'affichage : R(oi), D(ame), T(our), F(ou), C(avalier). Les coups restent en anglais dans les données.
+function fr(san){return String(san).replace(/[KQRBN]/g,c=>({K:"R",Q:"D",R:"T",B:"F",N:"C"}[c]));}
 
 /* ---------- Particules (un seul canvas plein écran) ----------
    o : étincelle ronde · e : éclat qui tourne · c : confetti qui virevolte · d : nuage de poussière */
@@ -61,6 +63,7 @@ function draw(){
   // chess.js 0.10.3 ne fournit pas p.square : on calcule la case depuis la position dans le tableau.
   G.board().forEach((row,i)=>row.forEach((p,j)=>{if(p)addPiece(files[j]+(8-i),p);}));
   marquerEchec();
+  if(typeof coupsMaj==="function")coupsMaj();
 }
 function addPiece(sq,p){const e=document.createElement("div");e.className="pc "+p.color;e.innerHTML=pieceHTML(p.color,p.type);place(e,sq);B.appendChild(e);pieces[sq]=e;}
 function tr(sq,plus=""){const[f,r]=xy(sq);return `translate(${f*100}%,${r*100}%)${plus}`;}
@@ -116,4 +119,5 @@ function animMove(m){
   if(m.promotion){setTimeout(()=>{if(e)e.innerHTML=pieceHTML(m.color,m.promotion);},dur);}
   markLast(m);marquerEchec();
   if(m.san.includes("#"))setTimeout(()=>basculeRoi(m.color==="w"?"b":"w"),dur+150);
+  if(typeof coupsMaj==="function")coupsMaj();
 }

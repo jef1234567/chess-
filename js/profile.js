@@ -11,13 +11,18 @@ const GRADES=[[0,"Page"],[50,"Écuyer"],[150,"Chevalier"],[300,"Chevalier banner
 // Ajouts du lot 9 : etoiles (meilleur nombre d'étoiles par épreuve), quete (quête du jour), coffres, conquis (lieux de la carte),
 // joute (record du contre-la-montre), finales (finales gagnées).
 // Ajouts du lot 13 : duel (duel à distance en cours), duels (bilan v/d/n), duelArchive (dernière partie comptée).
+// Ajouts du lot 14 : ouvertures (leçons réussies de mémoire), menaces {ok, n, vus} (mode « Trouve la menace ») ;
+// la partie du tournoi en cours garde aussi sa pendule (pendule, temps), le duel aussi (dans duel.jeu).
 // Les anciennes données sont gardées telles quelles ; les champs absents prennent leur valeur par défaut.
-function defauts(){return {nom:"",xp:0,cote:600,serie:0,best:0,reussi:0,th:{},hist:[],vus:[],son:true,aRevoir:[],reussis:[],tournoi:{partie:null,bilan:{}},parties:[],pieces:"fantasy",plateau:"nuit",hauts:[],conseils:0,pleinEcran:true,etoiles:{},quete:null,coffres:0,conquis:[],joute:{best:0,n:0},finales:{},duel:null,duels:{v:0,d:0,n:0},duelArchive:null};}
+function defauts(){return {nom:"",xp:0,cote:600,serie:0,best:0,reussi:0,th:{},hist:[],vus:[],son:true,aRevoir:[],reussis:[],tournoi:{partie:null,bilan:{}},parties:[],pieces:"fantasy",plateau:"nuit",hauts:[],conseils:0,pleinEcran:true,etoiles:{},quete:null,coffres:0,conquis:[],joute:{best:0,n:0},finales:{},duel:null,duels:{v:0,d:0,n:0},duelArchive:null,ouvertures:{},menaces:{ok:0,n:0,vus:[]}};}
 function migrer(o){
   const d=defauts(),s=Object.assign(d,o&&typeof o==="object"?o:{});
   for(const k of ["hist","vus","aRevoir","reussis","parties","hauts","conquis"])if(!Array.isArray(s[k]))s[k]=[];
-  for(const k of ["th","etoiles","finales"])if(!s[k]||typeof s[k]!=="object"||Array.isArray(s[k]))s[k]={};
+  for(const k of ["th","etoiles","finales","ouvertures"])if(!s[k]||typeof s[k]!=="object"||Array.isArray(s[k]))s[k]={};
   if(!s.joute||typeof s.joute!=="object")s.joute={best:0,n:0};
+  if(!s.menaces||typeof s.menaces!=="object")s.menaces={ok:0,n:0,vus:[]};
+  for(const k of ["ok","n"])if(typeof s.menaces[k]!=="number")s.menaces[k]=0;
+  if(!Array.isArray(s.menaces.vus))s.menaces.vus=[];
   if(s.quete&&(typeof s.quete!=="object"||!Array.isArray(s.quete.ids)||!Array.isArray(s.quete.faits)))s.quete=null;
   if(!s.tournoi||typeof s.tournoi!=="object")s.tournoi={};
   if(s.duel&&(typeof s.duel!=="object"||typeof s.duel.code!=="string"))s.duel=null;
