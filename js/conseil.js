@@ -58,15 +58,15 @@ async function cAnalyser(p,jeton){
 }
 function cPhrase(k){
   const g=new Chess(k.fen),best=g.move(uciCoup(k.E0.coup));
-  if(k.E0.score>=10000&&best)return `Il y avait un échec et mat avec <b>${best.san}</b> ! Regarde la flèche verte.`;
+  if(k.E0.score>=10000&&best)return `Il y avait un échec et mat avec <b>${fr(best.san)}</b> ! Regarde la flèche verte.`;
   if(k.E1.score>=10000)return `Après ce coup, l'adversaire pouvait te faire mat. Pense toujours à la sécurité de ton roi !`;
   const apres=new Chess(k.fen);apres.move(k.m.san);
   const rep=uciCoup(k.E1.coup),r=rep&&apres.move(rep);
   if(r&&r.captured&&!(best&&best.captured&&VAL_PIECE[best.captured]>=VAL_PIECE[r.captured]))
     return `Après ce coup, ${NOM_PIECE[r.captured]} en ${r.to} pouvait être pris. Avant de jouer, demande-toi : « Qu'est-ce que je laisse sans défense ? »`;
-  if(best&&best.captured)return `Tu pouvais prendre ${NOM_ADV[best.captured]} en ${best.to} avec <b>${best.san}</b> !`;
-  if(best&&best.san.includes("+"))return `<b>${best.san}</b> donnait échec et gagnait l'avantage. Cherche les échecs, les prises et les menaces !`;
-  return `<b>${best?best.san:"Un autre coup"}</b> était plus fort. Regarde la flèche verte et cherche pourquoi.`;
+  if(best&&best.captured)return `Tu pouvais prendre ${NOM_ADV[best.captured]} en ${best.to} avec <b>${fr(best.san)}</b> !`;
+  if(best&&best.san.includes("+"))return `<b>${fr(best.san)}</b> donnait échec et gagnait l'avantage. Cherche les échecs, les prises et les menaces !`;
+  return `<b>${best?fr(best.san):"Un autre coup"}</b> était plus fort. Regarde la flèche verte et cherche pourquoi.`;
 }
 const VAL_PIECE={p:1,n:3,b:3,r:5,q:9,k:0};
 function cAfficher(){
@@ -77,7 +77,7 @@ function cAfficher(){
   const num=Math.floor(k.i/2)+1;
   $("cNum").textContent=`${C.i+1}/${C.cles.length}`;
   $("cTrait").className="trait "+(C.partie.camp==="w"?"w":"b");
-  $("cTexte").textContent=`Coup ${num} : tu as joué ${k.m.san}`;
+  $("cTexte").textContent=`Coup ${num} : tu as joué ${fr(k.m.san)}`;
   cMsg(`<span class="ko">Flèche rouge : ton coup.</span> <span class="ok">Flèche verte : le meilleur.</span><br>${cPhrase(k)}${best?"<br><b>À toi : joue le coup de la flèche verte</b> pour voir la suite.":""}`);
   if(best)sqEl(best.from).classList.add("hint");
   $("cPrec").disabled=C.i===0;$("cSuiv").disabled=C.i>=C.cles.length-1;$("cMontrer").disabled=!best;
@@ -108,12 +108,12 @@ function cBonCoup(){
   clearArrows();clearMarks();const m=G.move(uciCoup(k.E0.coup));if(!m)return;animMove(m);
   C.montre=true;$("cMontrer").textContent="Revoir";
   const jeton=C.jeton,i=C.i;
-  if(G.game_over()){cMsg(`<span class="ok">${m.san} : ${G.in_checkmate()?"échec et mat !":"la partie s'arrête là."}</span>`);return;}
-  cMsg(`<span class="ok">Le bon coup était ${m.san}.</span> Regarde ce que l'adversaire pourrait faire…`);
+  if(G.game_over()){cMsg(`<span class="ok">${fr(m.san)} : ${G.in_checkmate()?"échec et mat !":"la partie s'arrête là."}</span>`);return;}
+  cMsg(`<span class="ok">Le bon coup était ${fr(m.san)}.</span> Regarde ce que l'adversaire pourrait faire…`);
   MOTEUR.analyser(G.fen(),10).then(r=>{
     if(jeton!==C.jeton||i!==C.i||!C.montre)return;const rep=uciCoup(r.coup),rm=rep&&G.move(rep);if(!rm)return;
     setTimeout(()=>{if(jeton!==C.jeton||i!==C.i)return;animMove(rm);
-      cMsg(`<span class="ok">Le bon coup était ${m.san}.</span> L'adversaire répondrait au mieux <b>${rm.san}</b>. Touche « Revoir » pour regarder encore la position.`);},500);
+      cMsg(`<span class="ok">Le bon coup était ${fr(m.san)}.</span> L'adversaire répondrait au mieux <b>${fr(rm.san)}</b>. Touche « Revoir » pour regarder encore la position.`);},500);
   });
 }
 $("cMontrer").onclick=()=>{

@@ -49,6 +49,8 @@
       <div class="duel" id="tDuel"></div>
       <p class="note">Avec quelles pièces veux-tu jouer ?</p>
       <div class="chips wrap" id="tCamps" role="group" aria-label="Couleur"></div>
+      <p class="note">Pendule (facultative) : chacun a ce temps pour toute la partie.</p>
+      <div class="chips wrap" id="tPendules" role="group" aria-label="Pendule"></div>
       <button id="tGo" class="or" type="button">En garde !</button>
       <h3 class="sep">Finales à gagner</h3>
       <p class="note">Tu as l'avantage, le Gardien défend de toutes ses forces. Fais mat pour gagner !</p>
@@ -60,7 +62,9 @@
         <div><h2 id="tTitre">Le tournoi</h2><p id="tTexte">Choisis ton adversaire.</p></div>
         <div class="theme-tag" id="tNiv">—</div>
       </div>
+      <div class="pendules" id="tPendule" hidden></div>
       <div id="tSlot" class="slot"></div>
+      <div class="coups" id="tCoups" aria-label="Coups joués"></div>
       <div class="parchemin" id="tParch"><p>…</p></div>
       <div class="actions">
         <button id="tNouvelle" class="or" type="button">Nouvelle</button>
@@ -93,6 +97,8 @@
       <p class="note">Joue contre un ami ou un parent sur un autre téléphone. Il faut Internet sur les deux appareils.</p>
       <p class="note">Avec quelles pièces veux-tu jouer ?</p>
       <div class="chips wrap" id="dCamps" role="group" aria-label="Couleur"></div>
+      <p class="note">Pendule (facultative) : chacun a ce temps pour toute la partie.</p>
+      <div class="chips wrap" id="dPendules" role="group" aria-label="Pendule"></div>
       <button id="dCreer" class="or" type="button">Créer un duel</button>
       <h3 class="sep">Rejoindre un duel</h3>
       <p class="note">Tape le code que ton adversaire t'a envoyé.</p>
@@ -115,7 +121,9 @@
         <div><h2 id="dTitre">Duel à distance</h2><p id="dTexte">…</p></div>
         <div class="theme-tag" id="dLien">—</div>
       </div>
+      <div class="pendules" id="dPendule" hidden></div>
       <div id="dSlot" class="slot"></div>
+      <div class="coups" id="dCoups" aria-label="Coups joués"></div>
       <div class="parchemin" id="dParch"><p>…</p></div>
       <div class="actions">
         <button id="dRevanche" class="or" type="button" hidden>Revanche</button>
@@ -177,6 +185,8 @@
 <script src="js/recompenses.js"></script>
 <script src="js/quetes.js"></script>
 <script src="js/duel.js"></script>
+<script src="js/partie.js"></script>
+<script src="js/ecole.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

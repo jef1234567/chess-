@@ -109,3 +109,15 @@ Demande de Jean-François (2026-11-23) : jouer père contre fils sur deux télé
 - ✅ Relais public ntfy.sh sans compte ; coups chiffrés de bout en bout ; le service worker ne met plus en cache les requêtes vers d'autres sites.
 - ✅ Testé dans Chromium avec un relais local imitant ntfy : 70 demi-coups entre deux « téléphones », rechargement d'un côté en pleine partie, coupure du relais, abandon, revanche. Envoi et lecture sur le vrai ntfy.sh vérifiés par l'Action « Test du relais du duel ».
 - ⏳ Essai réel père et fils (4G et Wi-Fi).
+
+## Lot 14 — Promotion, coups, nulles, ouvertures, pendule, menaces ✅ (sauf essai sur tablette)
+Demande de Jean-François (2026-11-24) : points 1 à 6 de la liste proposée, pendule facultative.
+- ✅ Promotion au choix (dame, tour, fou, cavalier) : petite fenêtre sur l'échiquier, au tournoi, au duel et dans les épreuves. L'adversaire dit en quoi son pion se change.
+- ✅ Liste des coups sous l'échiquier (tournoi et duel), en notation française (R, D, T, F, C) ; toucher un coup montre la position d'alors, toucher l'échiquier ramène à la partie. Les messages des coups passent aussi en notation française.
+- ✅ Partie nulle expliquée : écran « Partie nulle » avec la raison (pat, plus assez de pièces, trois fois la même position, 50 coups) et un conseil ; au pat, le roi bloqué brille en jaune.
+- ✅ Leçons d'ouvertures (puce « Ouvertures » de la salle) : italienne, espagnole, Londres, gambit dame (blancs) ; déjouer le coup du berger, scandinave, Caro-Kann (noirs). Passe 1 avec flèches et une phrase par coup, passe 2 de mémoire (au plus une erreur) : +15 XP la première fois. Coups vérifiés par `tools/verifier.js`.
+- ✅ Pendule facultative (sans, 15, 10 ou 5 min) au tournoi et au duel. Elle ne tourne que quand l'échiquier est à l'écran. Au duel, chaque appareil décompte son temps et l'envoie avec ses coups ; seul celui dont le temps est fini déclare la défaite.
+- ✅ « Trouve la menace » (puce de la salle) : dans une position d'épreuve vérifiée, l'enfant touche la pièce adverse qui menace un mat ou une prise gagnante ; deux essais, puis la réponse. 675 positions utilisables (contrôlé par `tools/verifier.js`). Bilan dans le blason.
+- ✅ Sauvegarde migrée sans perte (champs `ouvertures`, `menaces`).
+- ✅ Testé dans Chromium : promotion en cavalier, revue des coups pendant la réflexion de l'adversaire, temps écoulé, pat, leçon complète avec une erreur, menace trouvée et solution, duel entre deux « téléphones » (relais local) avec pendule, revue et perte au temps ; aucun défilement en 360×660, 800×1280, 1280×800 et 740×330.
+- ⏳ Essai sur la tablette ; choix des ouvertures et durée des pendules à ajuster avec le joueur.

@@ -66,7 +66,7 @@ const MOTEUR={
 
 /* ---------- État de la partie ----------
    S.tournoi.partie = {niv, camp, coups:[SAN]} : la partie en cours est gardée sur l'appareil. */
-const T={g:null,niv:null,camp:"w",etat:"choix",jeton:0,dernierScore:null,fen:null,jokers:3};
+const T={g:null,niv:null,camp:"w",etat:"choix",jeton:0,dernierScore:null,fen:null,jokers:3,pendule:0,temps:null};
 const JOKERS=3; // coups annulables par partie, aux niveaux Page et Écuyer seulement
 function tPeutAnnuler(){return T.g&&!T.niv.finale&&["page","ecuyer"].includes(T.niv.k)&&T.etat!=="fini";}
 function tPlus(fn,ms){const n=T.jeton;setTimeout(()=>{if(n===T.jeton)fn();},ms);}
@@ -74,7 +74,7 @@ function tMsg(h){$("tParch").innerHTML=`<p>${h}</p>`;}
 function tPeutJouer(){return T.etat==="joueur"&&T.g&&T.g.turn()===T.camp;}
 
 function tAfficher(){ // met l'échiquier du tournoi à l'écran
-  G=T.g||new Chess();flip=T.camp==="b";draw();clearArrows();
+  RV.actif=false;promoFermer();G=T.g||new Chess();flip=T.camp==="b";draw();clearArrows();
   const h=T.g&&T.g.history({verbose:true});if(h&&h.length)markLast(h[h.length-1]);
 }
 function tEntete(){
@@ -84,13 +84,15 @@ function tEntete(){
   const a=$("tAnnuler");a.hidden=!tPeutAnnuler();a.textContent=`Annuler (${T.jokers})`;
   a.disabled=!T.jokers||!tPeutJouer()||T.g.history().length<2;
   $("tTrait").className="trait "+(T.g&&T.g.turn()==="b"?"b":"w");
+  penduleAff("tPendule",T.g?T.temps:null,T.camp,n?n.chev:"",T.g&&T.etat!=="fini"&&T.g.history().length?T.g.turn():null);
   $("tTexte").textContent=!T.g?"Choisis ton adversaire.":T.etat==="fini"?"La partie est finie.":tPeutJouer()?"À toi de jouer.":`${n.chev} réfléchit…`;
 }
-function tSauver(){S.tournoi.partie=T.g&&T.etat!=="fini"?{niv:T.niv.k,camp:T.camp,coups:T.g.history(),fen:T.fen,jokers:T.jokers}:null;save();}
+function tSauver(){S.tournoi.partie=T.g&&T.etat!=="fini"?{niv:T.niv.k,camp:T.camp,coups:T.g.history(),fen:T.fen,jokers:T.jokers,pendule:T.pendule||0,temps:T.temps}:null;save();}
 
-function tCommencer(k,camp){
+function tCommencer(k,camp,pendule){
   T.jeton++;MOTEUR.stop();
   T.niv=nivDe(k);T.fen=T.niv.finale?T.niv.finale.fen:null;T.jokers=JOKERS;
+  T.pendule=T.niv.finale?0:pendule||0;T.temps=T.pendule?{w:T.pendule,b:T.pendule}:null;
   T.camp=T.niv.finale?"w":camp==="hasard"?(Math.random()<.5?"w":"b"):camp;
   T.g=T.fen?new Chess(T.fen):new Chess();T.dernierScore=null;T.etat="joueur";
   $("tChoix").hidden=true;$("tJeu").hidden=false;
@@ -104,13 +106,14 @@ function tReprendre(){ // au démarrage : reprendre la partie gardée sur l'appa
   const p=S.tournoi.partie;if(!p)return false;
   const g=p.fen?new Chess(p.fen):new Chess();for(const c of p.coups)if(!g.move(c))return false;
   T.niv=nivDe(p.niv);T.camp=p.camp;T.g=g;T.fen=p.fen||null;T.jokers=typeof p.jokers==="number"?p.jokers:JOKERS;
+  T.pendule=typeof p.pendule==="number"&&p.pendule>0?p.pendule:0;T.temps=T.pendule?tempsValide(p.temps,T.pendule):null;
   T.etat=g.turn()===T.camp?"joueur":"pense"; // « pense » : l'adversaire jouera à l'ouverture de l'onglet
   $("tChoix").hidden=true;$("tJeu").hidden=false;return true;
 }
 
 function tJouer(vm){ // coup du joueur
   clearMarks();sel=null;
-  const m=T.g.move({from:vm.from,to:vm.to,promotion:"q"});if(!m)return;
+  const m=T.g.move({from:vm.from,to:vm.to,promotion:vm.promotion||"q"});if(!m)return;
   animMove(m);tSauver();
   if(tFin())return;
   tAdversaire();
@@ -125,9 +128,10 @@ function tAdversaire(){
     const auHasard=n.hasard&&Math.random()<n.hasard;
     if(auHasard||!legaux.some(x=>x.from===coup.from&&x.to===coup.to)){const r=legaux[Math.floor(Math.random()*legaux.length)];coup={from:r.from,to:r.to,promotion:r.promotion};}
     tPlus(()=>{
+      if(RV.actif)tAfficher(); // l'enfant revoyait un ancien coup : retour à la partie
       const m=T.g.move(coup);if(!m)return;
       animMove(m);tSauver();
-      tMsg(`<b>${T.niv.chev}</b> joue <b>${m.san}</b>. « ${tCommentaire(m,auHasard?null:score)} »`);
+      tMsg(`<b>${T.niv.chev}</b> joue <b>${fr(m.san)}</b>. « ${tCommentaire(m,auHasard?null:score)} »`);
       if(tFin())return;
       T.etat="joueur";tEntete();
     },Math.max(0,650-(Date.now()-t0)));
@@ -146,7 +150,7 @@ function tCommentaire(m,score){
   if(m.san.includes("#"))return "Échec et mat ! Belle partie quand même.";
   if(m.san.includes("+"))return "Échec ! Protège ton roi.";
   if(m.flags.includes("k")||m.flags.includes("q"))return "Je mets mon roi à l'abri.";
-  if(m.promotion)return "Mon pion devient une dame !";
+  if(m.promotion)return `Mon pion devient ${{q:"une dame",r:"une tour",b:"un fou",n:"un cavalier"}[m.promotion]} !`;
   if(m.captured)return `Je prends ${NOM_PIECE[m.captured]} !`;
   const calme=["À toi de jouer.","Hmm, voyons voir…","Je prépare mon attaque.","Attention à tes pièces !","Je renforce ma position."];
   if(m.piece==="n"||m.piece==="b")calme.push("Je sors mes pièces.");
@@ -166,8 +170,8 @@ function tFin(){
     else{b.d++;txt=`<b>${T.niv.chev}</b> : « ${T.niv.gagne} »<br>Chaque défaite t'apprend quelque chose. Le conseil de guerre peut t'aider !`;}
   }else{
     b.n++;gain=Math.round(T.niv.xp/2);
-    const pourquoi=g.in_stalemate()?"pat : le roi ne peut plus bouger sans être en échec":g.in_threefold_repetition()?"la même position est revenue trois fois":g.insufficient_material()?"il ne reste pas assez de pièces pour faire mat":"règle des 50 coups";
-    txt=`<span class="ok">Partie nulle (${pourquoi}). +${gain} XP</span>`;
+    const n=nulleScene(g,T.camp,gain);
+    txt=`<span class="ok">Partie nulle : ${n.titre.toLowerCase().replace(/ !$/,"")}. +${gain} XP</span><br>${n.texte}`;
   }
   S.tournoi.bilan[T.niv.k]=b;gagnerXP(gain);tArchiver(g.in_checkmate()?(g.turn()!==T.camp?"victoire":"defaite"):"nulle");tSauver();majEntete();hautsVerifier();
   tMsg(txt);tEntete();$("tAbandon").disabled=true;
@@ -180,7 +184,7 @@ function tFinFinale(g){
   if(gagne){const gain=deja?5:T.niv.xp;S.finales[f.k]=true;gagnerXP(gain);
     txt=`<span class="ok">Mat ! Tu as gagné la finale « ${f.nom} ». +${gain} XP</span>`;
     tPlus(()=>{SON.victoire();confettis();sceau("Finale gagnée !",false,1800);},900);}
-  else txt=`<span class="ko">Partie nulle : la finale n'est pas gagnée.</span> ${g.in_stalemate()?"Pat ! Laisse toujours une case au roi adverse avant le mat.":"Il faut faire mat avant 50 coups sans prise ni coup de pion."} Réessaie !`;
+  else{const n=nulleScene(g,T.camp,0);txt=`<span class="ko">Partie nulle : la finale n'est pas gagnée.</span> ${n.texte} ${n.conseil} Réessaie !`;}
   tArchiver(gagne?"victoire":"nulle");tSauver();majEntete();hautsVerifier();tChoixMaj();
   tMsg(txt);tEntete();$("tAbandon").disabled=true;
   return true;
@@ -189,6 +193,17 @@ function tArchiver(res){
   if(T.g.history().length<2)return;
   S.parties.unshift({d:Date.now(),niv:T.niv.k,camp:T.camp,coups:T.g.history(),res,fen:T.fen||undefined});S.parties=S.parties.slice(0,20);
   $("tConseil").hidden=false;
+}
+// Temps écoulé (pendule) : celui dont le temps est fini perd.
+function tFinTemps(c){
+  if(!T.g||T.etat==="fini")return;
+  T.jeton++;MOTEUR.stop();T.etat="fini";promoFermer();
+  const gagne=c!==T.camp,b=S.tournoi.bilan[T.niv.k]||{v:0,n:0,d:0};let txt;
+  if(gagne){b.v++;gagnerXP(T.niv.xp);txt=`<span class="ok">Le temps de ${T.niv.chev} est écoulé : tu gagnes ! +${T.niv.xp} XP</span>`;
+    tPlus(()=>{SON.victoire();confettis();sceau("Victoire !",false,1800);},300);}
+  else{b.d++;SON.rate();txt=`<span class="ko">Ton temps est écoulé !</span> <b>${T.niv.chev}</b> gagne cette fois. Essaie une pendule plus longue, ou sans pendule.`;}
+  S.tournoi.bilan[T.niv.k]=b;tArchiver(gagne?"victoire":"defaite");tSauver();majEntete();hautsVerifier();
+  tMsg(txt);tEntete();$("tAbandon").disabled=true;
 }
 function tAbandonner(){
   if(!T.g||T.etat==="fini")return;
@@ -221,7 +236,7 @@ function tChoixMaj(){
   nv.addEventListener("click",()=>tDuel(nv.querySelector(".on").dataset.k));tDuel("page");tChoixMaj();
   $("tFinales").onclick=e=>{const b=e.target.closest(".chip");if(!b)return;ac();MOTEUR.demarrer();$("tConseil").hidden=true;tCommencer("finale:"+b.dataset.f,"w");$("tAbandon").disabled=false;};
   $("tAnnuler").onclick=tAnnuler;
-  $("tGo").onclick=()=>{ac();MOTEUR.demarrer();$("tConseil").hidden=true;tCommencer(nv.querySelector(".on").dataset.k,cp.querySelector(".on").dataset.k);$("tAbandon").disabled=false;};
+  $("tGo").onclick=()=>{ac();MOTEUR.demarrer();$("tConseil").hidden=true;tCommencer(nv.querySelector(".on").dataset.k,cp.querySelector(".on").dataset.k,penduleChoisie("tPendules"));$("tAbandon").disabled=false;};
   $("tNouvelle").onclick=()=>{T.jeton++;MOTEUR.stop();if(T.etat!=="fini"){T.etat="fini";S.tournoi.partie=null;save();}tChoisir();};
   $("tAbandon").onclick=tAbandonner;
   $("tConseil").onclick=()=>conseilOuvrir(0);

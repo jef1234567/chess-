@@ -22,7 +22,7 @@ const js = path.join(__dirname, "..", "js");
 const fichiers = process.argv.length > 2 ? process.argv.slice(2)
   : [path.join(js, "puzzles.js"), path.join(js, "lichess.js")].filter(f => fs.existsSync(f));
 const code = fichiers.map(f => fs.readFileSync(f, "utf8")).join("\n;\n");
-const { THEMES, P, FINALES } = vm.runInNewContext(code + "\n;({THEMES,P,FINALES:typeof FINALES===\"undefined\"?[]:FINALES})");
+const { THEMES, P, FINALES, OUVERTURES, menacesDe, fenJoueur } = vm.runInNewContext(code + "\n;({THEMES,P,FINALES:typeof FINALES===\"undefined\"?[]:FINALES,OUVERTURES:typeof OUVERTURES===\"undefined\"?[]:OUVERTURES,menacesDe:typeof menacesDe===\"undefined\"?null:menacesDe,fenJoueur:typeof fenJoueur===\"undefined\"?null:fenJoueur})", { Chess });
 
 let ko = 0, n = 0;
 const vus = new Set();
@@ -48,6 +48,26 @@ for (const f of FINALES) {
   if (!f.k || !f.nom || !f.x) err.push("fiche incomplète");
   if (err.length) { ko++; console.log(`✗ finale ${f.k} : ${err.join(" ; ")}`); }
   else console.log(`✓ finale ${f.k}`);
+}
+// Leçons d'ouvertures : chaque coup est légal depuis la position de départ, chaque coup a sa phrase.
+const cles = new Set();
+for (const o of OUVERTURES) {
+  const err = [], g = new Chess();
+  if (!o.k || !o.nom || !o.x || !["w", "b"].includes(o.camp)) err.push("fiche incomplète");
+  if (cles.has(o.k)) err.push("clé en double");
+  cles.add(o.k);
+  o.l.forEach(([san, c], i) => { if (!err.length && !g.move(san)) err.push(`coup ${i + 1} (${san}) illégal`); if (!c) err.push(`coup ${i + 1} sans phrase`); });
+  // la leçon finit sur un coup de l'enfant
+  if (o.l.length % 2 !== (o.camp === "w" ? 1 : 0)) err.push("la ligne doit finir par un coup de l'enfant");
+  if (err.length) { ko++; console.log(`✗ ouverture ${o.k} : ${err.join(" ; ")}`); }
+  else console.log(`✓ ouverture ${o.k} (${o.l.length} coups)`);
+}
+// Trouve la menace : assez de positions où l'adversaire menace un mat ou une prise gagnante.
+if (menacesDe) {
+  let nb = 0;
+  for (const p of P) { const ms = menacesDe(fenJoueur(p)); if (ms.length && new Set(ms.map(m => m.from)).size <= 2) nb++; }
+  if (nb < 100) { ko++; console.log(`✗ trouve la menace : seulement ${nb} positions`); }
+  else console.log(`✓ trouve la menace : ${nb} positions utilisables`);
 }
 console.log(`\n${P.length - ko}/${P.length} problèmes vérifiés.`);
 process.exit(ko ? 1 : 0);

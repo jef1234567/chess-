@@ -32,3 +32,104 @@ const FINALES=[
 {k:"tours",nom:"Deux tours contre roi",fen:"8/8/8/3k4/8/8/8/R3K2R w - - 0 1",x:"L'escalier : une tour coupe la route, l'autre donne échec, et on recommence jusqu'au bord."},
 {k:"pion",nom:"Roi et pion contre roi",fen:"4k3/8/4K3/4P3/8/8/8/8 w - - 0 1",x:"Ton roi marche devant ton pion pour lui ouvrir la route jusqu'à la promotion."}
 ];
+
+/* Leçons d'ouvertures (lot 14). l : coups en SAN depuis la position de départ, avec une phrase chacun.
+   camp : le côté joué par l'enfant. Vérifiées par tools/verifier.js (chaque coup est légal). */
+const OUVERTURES=[
+{k:"italienne",nom:"La partie italienne",camp:"w",x:"On sort vite les pièces, et le fou vise f7.",l:[
+ ["e4","Le pion prend le centre et ouvre la route à ta dame et à ton fou."],
+ ["e5","Les noirs prennent aussi leur part du centre."],
+ ["Nf3","Le cavalier sort et attaque le pion e5."],
+ ["Nc6","Le cavalier noir défend son pion."],
+ ["Bc4","Le fou vise f7, la case faible à côté du roi noir."],
+ ["Bc5","Les noirs font pareil : leur fou vise f2."],
+ ["c3","Ce petit pion prépare d4, pour avoir deux pions au centre."],
+ ["Nf6","Le cavalier noir sort et attaque ton pion e4."],
+ ["d4","Deux pions au centre ! Tes pièces ont de la place. Ensuite : le roque."]]},
+{k:"espagnole",nom:"La partie espagnole",camp:"w",x:"Le fou attaque le cavalier qui défend le centre.",l:[
+ ["e4","Le pion prend le centre."],
+ ["e5","Les noirs répondent au centre."],
+ ["Nf3","Le cavalier attaque e5."],
+ ["Nc6","Le cavalier noir le défend."],
+ ["Bb5","Le fou attaque le cavalier qui défend e5."],
+ ["a6","Les noirs chassent le fou avec un pion."],
+ ["Ba4","Le fou recule, mais il garde l'œil sur le cavalier."],
+ ["Nf6","Le cavalier noir sort et attaque e4."],
+ ["O-O","Le roque : ton roi est à l'abri, et ta tour va pouvoir aider au centre."]]},
+{k:"londres",nom:"Le système de Londres",camp:"w",x:"Un plan simple et solide, presque toujours le même.",l:[
+ ["d4","Le pion de la dame prend le centre."],
+ ["d5","Les noirs bloquent ton pion."],
+ ["Bf4","Le fou sort tout de suite, avant que le pion e3 lui ferme la route."],
+ ["Nf6","Le cavalier noir sort."],
+ ["e3","Ce pion soutient d4 et ouvre la route à ton autre fou."],
+ ["e6","Les noirs ouvrent la route de leur fou."],
+ ["Nf3","Ton cavalier sort vers le centre."],
+ ["c5","Les noirs attaquent ton pion d4."],
+ ["c3","Le pion c3 soutient d4 : ton centre tient bon."],
+ ["Nc6","Les noirs attaquent encore d4."],
+ ["Nbd2","Ton dernier cavalier sort. Ensuite : le fou en d3 et le roque."]]},
+{k:"gambit",nom:"Le gambit dame",camp:"w",x:"Tu offres un pion pour attirer un pion noir loin du centre.",l:[
+ ["d4","Le pion prend le centre."],
+ ["d5","Les noirs bloquent."],
+ ["c4","Tu offres ton pion c4 : si les noirs le prennent, ton pion e4 viendra au centre."],
+ ["e6","Les noirs refusent et soutiennent leur pion d5."],
+ ["Nc3","Le cavalier attaque d5 une fois de plus."],
+ ["Nf6","Le cavalier noir défend d5."],
+ ["Bg5","Le fou cloue le cavalier : s'il bouge, la dame noire est prise."],
+ ["Be7","Le fou noir se met devant la dame : le clouage est fini."],
+ ["e3","Ce pion ouvre la route à ton fou f1. Ensuite : le cavalier en f3 et le roque."]]},
+{k:"berger",nom:"Déjouer le coup du berger",camp:"b",x:"Le piège le plus connu des débutants. Apprends à le déjouer !",l:[
+ ["e4","Les blancs prennent le centre."],
+ ["e5","Toi aussi, tu prends le centre."],
+ ["Bc4","Le fou blanc vise f7…"],
+ ["Nc6","Tu sors un cavalier, qui défend aussi e5."],
+ ["Qh5","Attention ! La dame et le fou visent f7 : les blancs menacent la dame en f7, échec et mat !"],
+ ["g6","Le pion chasse la dame et ferme sa route vers f7."],
+ ["Qf3","La dame revient viser f7 par un autre chemin !"],
+ ["Nf6","Ton cavalier bouche la route de la dame. f7 est sauvé, et tu as sorti une pièce de plus !"]]},
+{k:"scandinave",nom:"La défense scandinave",camp:"b",x:"Avec les noirs, tu attaques le pion e4 dès le premier coup.",l:[
+ ["e4","Les blancs prennent le centre."],
+ ["d5","Tu attaques tout de suite le pion e4."],
+ ["exd5","Les blancs prennent ton pion."],
+ ["Qxd5","Ta dame reprend : la voilà au centre."],
+ ["Nc3","Le cavalier blanc attaque ta dame."],
+ ["Qa5","Ta dame se met à l'abri sur le côté, sur une case qu'aucune pièce n'attaque."],
+ ["d4","Les blancs prennent le centre."],
+ ["Nf6","Ton cavalier sort."],
+ ["Nf3","Le cavalier blanc sort aussi."],
+ ["c6","Ce pion donne une case de repli à ta dame. Ensuite : ton fou en f5, e6 et le roque."]]},
+{k:"carokann",nom:"La défense Caro-Kann",camp:"b",x:"Une défense solide : on prépare d5 avec un petit pion.",l:[
+ ["e4","Les blancs prennent le centre."],
+ ["c6","Ce petit pion prépare d5."],
+ ["d4","Les blancs mettent un deuxième pion au centre."],
+ ["d5","Tu attaques e4, et ton pion d5 est soutenu par c6."],
+ ["Nc3","Le cavalier blanc défend e4."],
+ ["dxe4","Tu prends le pion."],
+ ["Nxe4","Le cavalier blanc reprend."],
+ ["Bf5","Ton fou sort et chasse le cavalier."],
+ ["Ng3","Le cavalier attaque ton fou."],
+ ["Bg6","Le fou recule, mais il reste bien placé. Ta position est solide !"]]},
+];
+
+/* Mode « Trouve la menace » (lot 14) : dans une position où l'enfant a le trait, que menace l'adversaire
+   s'il pouvait jouer ? On le fait jouer « à la place » (trait inversé) et on garde :
+   - un échec et mat ;
+   - une prise qui gagne au moins 2 points (pièce non défendue, ou plus forte que celle qui prend).
+   Renvoie [{from,to,piece,captured,mat,defendu}]. Les positions viennent des épreuves vérifiées. */
+function menacesDe(fen){
+  const V={p:1,n:3,b:3,r:5,q:9,k:0};
+  const g=new Chess(fen);if(g.in_check()||g.game_over())return [];
+  const f=fen.split(" ");f[1]=f[1]==="w"?"b":"w";f[3]="-";
+  const h=new Chess();if(!h.load(f.join(" ")))return [];
+  const res=[];
+  for(const m of h.moves({verbose:true})){
+    h.move(m);
+    if(h.in_checkmate())res.push({from:m.from,to:m.to,piece:m.piece,mat:true});
+    else if(m.captured){const defendu=h.moves({verbose:true}).some(r=>r.to===m.to);
+      if(V[m.captured]-(defendu?V[m.piece]:0)>=2)res.push({from:m.from,to:m.to,piece:m.piece,captured:m.captured,defendu});}
+    h.undo();
+  }
+  return res;
+}
+// Position de départ d'une épreuve, du point de vue du joueur (après le coup adverse automatique).
+function fenJoueur(p){if(!p.a)return p.fen;const g=new Chess(p.fen);g.move(p.line[0]);return g.fen();}

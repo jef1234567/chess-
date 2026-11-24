@@ -71,9 +71,13 @@ function dRecevoir(o){
 function dAdopter(j,nouvelle){ // partie reçue : on joue les coups qui manquent, avec animation
   const g=new Chess();for(const c of j.coups)if(!g.move(c))return; // partie illisible : ignorée
   const avant=D.jeu&&!nouvelle?D.jeu.coups.length:0;
-  D.jeu={p:j.p,blanc:j.blanc==="i"?"i":"h",coups:g.history(),fin:j.fin||null};dSauver();
+  // pendule : on prend le temps de l'adversaire dans son message, et on garde le sien (décompté ici)
+  const pendule=PENDULES.some(([m])=>m&&m*60000===j.pendule)?j.pendule:0;let temps=null;
+  if(pendule){temps=tempsValide(j.temps,pendule);if(!nouvelle&&D.jeu&&D.jeu.temps){const moi=dCamp();temps[moi]=D.jeu.temps[moi];}}
+  D.jeu={p:j.p,blanc:j.blanc==="i"?"i":"h",coups:g.history(),fin:j.fin||null,pendule,temps};dSauver();
   if(mode!=="duel"||$("dJeu").hidden){dMontrerJeu();return;}
-  if(nouvelle||j.coups.length-avant!==1){dAfficher();}
+  const enRevue=RV.actif;RV.actif=false;
+  if(nouvelle||enRevue||j.coups.length-avant!==1){dAfficher();}
   else{G.move(j.coups[avant]);const h=G.history({verbose:true});animMove(h[h.length-1]);}
   if(nouvelle)dMsg(`${j.p>1?"Revanche !":"Le duel commence !"} Tu as les <b>${dCamp()==="w"?"blancs":"noirs"}</b>.${dPeutJouer()?" À toi de jouer.":""}`);
   else if(!dFin())dMsg(`<b>${esc(D.adv||"Ton adversaire")}</b> a joué <b>${D.jeu.coups[D.jeu.coups.length-1]}</b>. À toi !`);
@@ -87,20 +91,21 @@ function dTermine(){return !D.jeu||!!D.jeu.fin||dG().game_over();}
 function dPeutJouer(){return D.jeu&&!dTermine()&&G.turn()===dCamp();}
 function dMsg(h){$("dParch").innerHTML=`<p>${h}</p>`;}
 function dSauver(){S.duel=D.code?{code:D.code,role:D.role,adv:D.adv,jeu:D.jeu,dernier:D.dernier,vu:D.vu}:null;save();}
-function dAfficher(){if(mode!=="duel")return;G=dG();flip=dCamp()==="b";draw();clearArrows();
+function dAfficher(){if(mode!=="duel")return;RV.actif=false;promoFermer();G=dG();flip=dCamp()==="b";draw();clearArrows();
   const h=G.history({verbose:true});if(h.length)markLast(h[h.length-1]);dEntete();}
 function dEntete(){
-  if(!D.jeu){$("dTexte").textContent="En attente de ton adversaire…";return;}
-  const g=dG();$("dTrait").className="trait "+(g.turn()==="b"?"b":"w");
+  if(!D.jeu){$("dTexte").textContent="En attente de ton adversaire…";$("dPendule").hidden=true;return;}
+  const g=dG();D.termine=!!D.jeu.fin||g.game_over();
+  penduleAff("dPendule",D.jeu.temps,dCamp(),D.adv||"Adversaire",D.termine||!D.jeu.coups.length?null:g.turn());$("dTrait").className="trait "+(g.turn()==="b"?"b":"w");
   $("dTitre").textContent=D.adv?`Duel contre ${D.adv}`:"Duel à distance";
   $("dTexte").textContent=dTermine()?"La partie est finie.":g.turn()===dCamp()?"À toi de jouer.":`${D.adv||"Ton adversaire"} réfléchit…`;
   $("dRevanche").hidden=!dTermine();$("dAbandon").disabled=dTermine();
 }
 function dJouer(vm){
   clearMarks();sel=null;
-  const m=G.move({from:vm.from,to:vm.to,promotion:"q"});if(!m)return;
-  animMove(m);D.jeu.coups.push(m.san);dSauver();dEnvoyerEtat();
-  if(!dFin())dMsg(`Tu as joué <b>${m.san}</b>. ${esc(D.adv||"Ton adversaire")} réfléchit…`);
+  const m=G.move({from:vm.from,to:vm.to,promotion:vm.promotion||"q"});if(!m)return;
+  D.jeu.coups.push(m.san);animMove(m);dSauver();dEnvoyerEtat();
+  if(!dFin())dMsg(`Tu as joué <b>${fr(m.san)}</b>. ${esc(D.adv||"Ton adversaire")} réfléchit…`);
   dEntete();
 }
 const D_RES={victoire:"Victoire",defaite:"Défaite",nulle:"Nulle",abandon:"Abandon"};
@@ -109,10 +114,13 @@ function dFin(){ // vrai si la partie est finie ; bilan et archive une seule foi
   let res,txt;
   if(j.fin&&j.fin.abandon){const moi=j.fin.abandon===D.role;res=moi?"abandon":"victoire";
     txt=moi?"Tu as abandonné. Ce n'est que partie remise !":`<span class="ok">${esc(D.adv||"Ton adversaire")} abandonne : tu gagnes !</span>`;}
+  else if(j.fin&&j.fin.temps){const moi=j.fin.temps===D.role;res=moi?"defaite":"victoire";
+    txt=moi?"Ton temps est écoulé ! Ce n'est que partie remise.":`<span class="ok">Le temps de ${esc(D.adv||"ton adversaire")} est écoulé : tu gagnes !</span>`;}
   else if(g.in_checkmate()){const gagne=g.turn()!==dCamp();res=gagne?"victoire":"defaite";
     txt=gagne?`<span class="ok">Échec et mat ! Tu as gagné le duel !</span>`:`Échec et mat… ${esc(D.adv||"Ton adversaire")} gagne cette fois. Le conseil de guerre peut t'aider !`;}
-  else{res="nulle";txt=`<span class="ok">Partie nulle (${g.in_stalemate()?"pat":g.in_threefold_repetition()?"même position trois fois":g.insufficient_material()?"plus assez de pièces pour faire mat":"règle des 50 coups"}).</span>`;}
+  else{res="nulle";const n=nulleExpliquer(g,dCamp());txt=`<span class="ok">Partie nulle : ${n.titre.toLowerCase().replace(/ !$/,"")}.</span> ${n.texte}`;}
   if(S.duelArchive!==D.code+":"+j.p){S.duelArchive=D.code+":"+j.p;
+    if(res==="nulle")nulleScene(g,dCamp(),0);
     const b=S.duels;b[{victoire:"v",defaite:"d",abandon:"d",nulle:"n"}[res]]++;
     if(res==="victoire"){gagnerXP(30);setTimeout(()=>{SON.victoire();confettis();sceau("Victoire !",false,1800);},900);}
     if(j.coups.length>=2){S.parties.unshift({d:Date.now(),niv:"duel",adv:D.adv,camp:dCamp(),coups:j.coups.slice(),res});S.parties=S.parties.slice(0,20);}
@@ -121,7 +129,8 @@ function dFin(){ // vrai si la partie est finie ; bilan et archive une seule foi
 }
 function dAbandonner(){if(!D.jeu||dTermine())return;D.jeu.fin={abandon:D.role};dSauver();dEnvoyerEtat();dFin();}
 function dRevanche(){if(!D.jeu||!dTermine())return;
-  D.jeu={p:D.jeu.p+1,blanc:D.jeu.blanc==="h"?"i":"h",coups:[],fin:null};dSauver();dEnvoyerEtat();dAfficher();
+  const pe=D.jeu.pendule||0;
+  D.jeu={p:D.jeu.p+1,blanc:D.jeu.blanc==="h"?"i":"h",coups:[],fin:null,pendule:pe,temps:pe?{w:pe,b:pe}:null};dSauver();dEnvoyerEtat();dAfficher();
   dMsg(`Revanche ! Tu as les <b>${dCamp()==="w"?"blancs":"noirs"}</b>.${dCamp()==="w"?" À toi de commencer.":""}`);}
 
 /* ---------- Écrans ---------- */
@@ -130,9 +139,9 @@ function dEcran(e){$("dAccueil").hidden=e!=="accueil";$("dAttente").hidden=e!=="
   if(e==="jeu"){$("dSlot").appendChild($("plateau"));dAfficher();}}
 function dMontrerJeu(){if(mode==="duel"&&D.jeu){dEcran("jeu");
   dMsg(!D.vu&&D.role==="h"?"Ton adversaire n'est pas encore là. Tu peux jouer ton premier coup.":dTermine()?"La partie est finie.":G.turn()===dCamp()?"À toi de jouer !":`${esc(D.adv||"Ton adversaire")} réfléchit…`);}}
-async function dOuvrir(code,role,camp){
+async function dOuvrir(code,role,camp,pendule){
   await dPreparer(code);D.annonce=false;D.code=code;D.role=role;D.adv="";D.vu=false;D.dernier=null;
-  D.jeu=role==="h"?{p:1,blanc:camp==="b"?"i":"h",coups:[],fin:null}:null;
+  D.jeu=role==="h"?{p:1,blanc:camp==="b"?"i":"h",coups:[],fin:null,pendule:pendule||0,temps:pendule?{w:pendule,b:pendule}:null}:null;
   dSauver();dEcouter();
   if(role==="h")dEcran("attente");else{dEcran("jeu");dMsg("Je cherche le duel…");dEntete();dEnvoyerEtat();}
 }
@@ -141,6 +150,7 @@ function dLienInvitation(){return location.origin+location.pathname+"#duel="+D.c
 async function dReprendre(){const s=S.duel;if(!s||!s.code)return;
   try{await dPreparer(s.code);}catch(e){return;}
   Object.assign(D,{code:s.code,role:s.role,adv:s.adv||"",jeu:s.jeu||null,dernier:s.dernier||null,vu:!!s.vu});
+  if(D.jeu){D.jeu.pendule=PENDULES.some(([m])=>m&&m*60000===D.jeu.pendule)?D.jeu.pendule:0;D.jeu.temps=D.jeu.pendule?tempsValide(D.jeu.temps,D.jeu.pendule):null;}
   if(mode==="duel")D.jeu?dEcran("jeu"):dEcran(D.role==="h"?"attente":"jeu");}
 function dOnglet(){ // à l'ouverture de l'onglet Duel
   if(!crypto.subtle){$("dErreur").textContent="Ce navigateur ne permet pas le duel à distance.";dEcran("accueil");return;}
@@ -154,7 +164,7 @@ function dOnglet(){ // à l'ouverture de l'onglet Duel
   const cp=$("dCamps");
   cp.innerHTML=[["w","Les blancs"],["b","Les noirs"],["hasard","Au hasard"]].map(([k,v],i)=>`<button type="button" class="chip${i===0?" on":""}" data-k="${k}">${v}</button>`).join("");
   cp.onclick=e=>{const b=e.target.closest(".chip");if(!b)return;cp.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c===b));};
-  $("dCreer").onclick=()=>{ac();let c=cp.querySelector(".on").dataset.k;if(c==="hasard")c=Math.random()<.5?"w":"b";dOuvrir(dNouveauCode(),"h",c);};
+  $("dCreer").onclick=()=>{ac();let c=cp.querySelector(".on").dataset.k;if(c==="hasard")c=Math.random()<.5?"w":"b";dOuvrir(dNouveauCode(),"h",c,penduleChoisie("dPendules"));};
   $("dRejoindre").onclick=()=>{ac();const c=dNormaliser($("dCode").value);
     if(c.length!==12){$("dErreur").textContent="Le code a 12 lettres et chiffres. Vérifie-le !";return;}
     $("dErreur").textContent="";dOuvrir(c,"i");};
