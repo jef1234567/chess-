@@ -1,0 +1,89 @@
+/* Famille (lot 15) : choix du joueur, écussons, icônes, habillage selon l'âge, progrès. */
+:root{--perso:#24427f}
+
+/* Boutons plus ludiques : relief et enfoncement au toucher */
+button{transition:transform .08s ease-out,box-shadow .08s ease-out}
+button:not(:disabled):active{transform:translateY(2px)}
+button.or{box-shadow:0 3px 0 #8a6a1a,0 6px 12px #0005}
+button.or:not(:disabled):active{box-shadow:0 1px 0 #8a6a1a}
+.chip.on{background:var(--perso);border-color:var(--or);box-shadow:0 0 0 1px #e3b84b55,0 3px 8px #0006}
+
+/* Écusson du joueur (bannière + pièce) */
+.ecusson{position:relative;display:inline-grid;place-items:center;width:34px;height:40px;flex:none}
+.ecusson svg{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 2px 3px #0008)}
+.ecusson img{position:relative;width:64%;height:64%;object-fit:contain;transform:translateY(-6%);filter:drop-shadow(0 2px 1px #0007)}
+.ecusson.grand{width:72px;height:84px}
+button.avatar{flex:none;padding:0;min-height:0;background:none;border-radius:10px;line-height:0}
+button.avatar:focus-visible{outline-offset:1px}
+
+/* Onglets avec icônes */
+nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;line-height:1.1}
+nav .ico{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+nav button[aria-current="true"]{background:linear-gradient(180deg,var(--perso),#1f2b52);box-shadow:inset 0 -3px 0 var(--or)}
+nav button[aria-current="true"] .ico{animation:sautille .4s ease-out}
+@keyframes sautille{40%{transform:translateY(-4px) scale(1.12)}}
+@media (max-height:500px){nav .ico{display:none}}
+
+/* Mission : liseré à la couleur du joueur */
+.mission{border-left:5px solid var(--perso)}
+
+/* Écran « Qui joue ? » */
+.choix{position:fixed;inset:0;z-index:40;display:none;align-items:center;justify-content:center;padding:16px;overflow-y:auto;
+  background:radial-gradient(circle at 50% 30%,#2a3a70f5,#0a0f22fc 75%)}
+.choix.on{display:flex}
+.choix-boite{width:min(100%,640px);text-align:center;display:flex;flex-direction:column;gap:14px}
+.choix h2{margin:0;font-family:var(--f-titre);font-weight:400;color:var(--or);font-size:clamp(28px,8vw,46px);text-shadow:0 3px 0 #000}
+.choix p{margin:0;color:var(--texte);line-height:1.4}
+.choix-grille{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media (min-width:640px){.choix-grille{grid-template-columns:repeat(4,1fr)}}
+button.profil{display:flex;flex-direction:column;align-items:center;gap:4px;padding:16px 8px 12px;border-radius:18px;min-height:0;
+  background:linear-gradient(180deg,#1f2b52,#141c38);border:2px solid #3a4a7a;box-shadow:0 6px 0 #0a0f22,0 10px 24px #0008;
+  animation:entre .45s cubic-bezier(.2,1.4,.4,1) both;animation-delay:calc(var(--i,0)*80ms)}
+button.profil:hover,button.profil:focus-visible{border-color:var(--or)}
+button.profil .ecusson{width:76px;height:90px;margin-bottom:4px}
+button.profil b{font-family:var(--f-titre);font-weight:400;font-size:1.3rem;color:var(--or-pale)}
+button.profil span{font-size:.85rem;color:var(--texte-doux)}
+button.profil em{font-style:normal;font-size:.78rem;color:#9be3b8}
+button.profil.conseille{border-color:var(--or)}
+.choix-boite>button{align-self:center;background:var(--pierre)}
+@keyframes entre{from{opacity:0;transform:translateY(24px) scale(.9)}}
+
+/* Blason : carte du joueur et progrès */
+.joueur-tete{display:flex;gap:14px;align-items:center}
+.joueur-tete b{font-family:var(--f-titre);font-weight:400;font-size:1.5rem;color:var(--or-pale)}
+.joueur-tete p{margin:4px 0 0}
+#bChanger{width:100%;margin-top:4px}
+.jours{display:grid;grid-template-columns:repeat(14,1fr);gap:4px;height:90px;align-items:end;margin-bottom:8px}
+.jour{position:relative;height:100%;display:flex;flex-direction:column-reverse;padding-bottom:16px}
+.jour i{display:block;width:100%;border-radius:3px 3px 0 0}
+.jour i.okb{background:linear-gradient(180deg,var(--or-pale),var(--or))}
+.jour i.ko{background:#4d566e;border-radius:0}
+.jour span{position:absolute;bottom:0;left:0;right:0;text-align:center;font-size:.65rem;color:var(--texte-doux)}
+#progres p{margin:6px 0 0}
+.mieux{color:#9be3b8}.travail{color:#ffd59a}
+
+/* Astuce sous le texte de l'épreuve */
+.parchemin p.astuce{margin-top:6px;font-size:.88rem;opacity:.9}
+
+/* Enfants (petits et 8 ans) : vrai parchemin clair, plus chaleureux */
+body:not(.age-adulte) .parchemin{background:radial-gradient(circle at 30% 20%,#fbf0cf,#ecd9a4 70%,#dcc287);color:#3a2a10;border-color:#a07a3a;
+  box-shadow:inset 0 0 18px #a07a3a66,0 4px 10px #0006}
+body:not(.age-adulte) .parchemin .ok{color:#1f6b40}
+body:not(.age-adulte) .parchemin .ko{color:#9a1f2a}
+body:not(.age-adulte) .parchemin b{color:#6b3f1f}
+
+/* Petits (6 ans et moins) : tout est plus grand, moins de texte et de boutons */
+body.age-petit{font-size:18px}
+body.age-petit .mission h2{font-size:1.25rem}
+body.age-petit .mission p,body.age-petit .parchemin p{font-size:1.1rem}
+body.age-petit .chip{min-height:44px;padding:8px 16px;font-size:1rem}
+body.age-petit .jeu .actions button{min-height:54px;font-size:1.05rem}
+body.age-petit #bSolution,body.age-petit .sq .co,body.age-petit .mission .theme-tag{display:none}
+body.age-petit .sq .dot{inset:32%;background:radial-gradient(circle,#2f8f5bcc 45%,#2f8f5b44 72%)}
+body.age-petit .sq .ring{border-color:#2f8f5bcc;border-width:6px}
+body.age-petit .parchemin{cursor:pointer}
+
+/* Adultes : interface plus sobre */
+body.age-adulte .parchemin p.astuce{opacity:.75}
+
+@media (prefers-reduced-motion:reduce){button.profil,nav button[aria-current="true"] .ico{animation:none}button{transition:none}}

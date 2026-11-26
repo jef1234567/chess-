@@ -10,8 +10,16 @@ const IA={
   cle(){try{return localStorage.getItem(this.CLE)||"";}catch(e){return "";}},
   garder(k){try{if(k)localStorage.setItem(this.CLE,k);else localStorage.removeItem(this.CLE);}catch(e){}},
   dispo(){return !!this.cle()&&navigator.onLine!==false;},
-  SYSTEME:`Tu es le maître d'armes de « La Salle d'armes », un jeu d'échecs pour un enfant de 8 ans qui joue déjà bien.
-Tu expliques un coup d'échecs en français, en tutoyant l'enfant, avec des phrases courtes et des mots simples.
+  // Lot 15 : le public dépend du profil (petit, enfant, adulte) ; le reste des règles est commun.
+  PUBLIC:{petit:`un enfant de 5 ou 6 ans qui apprend les échecs.
+Tu expliques un coup d'échecs en français, en tutoyant l'enfant, avec des phrases très courtes et des mots très simples (pas de notation, nomme les pièces et les cases par leur couleur ou leur place).`,
+    enfant:`un enfant de 8 ans qui joue déjà bien.
+Tu expliques un coup d'échecs en français, en tutoyant l'enfant, avec des phrases courtes et des mots simples.`,
+    adulte:`un adulte qui joue en club ou en famille.
+Tu expliques un coup d'échecs en français, en tutoyant le joueur, avec des termes techniques précis (notation, motifs tactiques, plans).`},
+  get SYSTEME(){return `Tu es le maître d'armes de « La Salle d'armes », un jeu d'échecs pour ${this.PUBLIC[ageCat()]}
+${this.REGLES_IA}`;},
+  REGLES_IA:`
 Règles :
 - 3 phrases au maximum, 60 mots au maximum, sans titre ni liste.
 - Appuie-toi uniquement sur les coups et les faits donnés (ils viennent d'un moteur d'échecs) : n'invente pas d'autres variantes.
@@ -64,18 +72,18 @@ function iaQuestionEpreuve(coupJoue){
   for(let i=0;i<(PZ.a?1:0);i++)avant.push(g.move(PZ.line[i]).san);
   const camp=g.turn()==="w"?"blancs":"noirs";
   const sol=PZ.line.slice(PZ.a?1:0);
-  return `Épreuve « ${THEMES[PZ.t]} ». L'enfant joue les ${camp}.
+  return `Épreuve « ${THEMES[PZ.t]} ». Le joueur joue les ${camp}.
 ${avant.length?`L'adversaire vient de jouer ${avant[0]}.\n`:""}${iaPosition(g.fen())}
-Solution (coups alternés, en commençant par l'enfant) : ${sol.join(" ")}.
-${coupJoue?`L'enfant a joué ${coupJoue}, ce qui ne marchait pas.`:"L'enfant a demandé la solution."}
+Solution (coups alternés, en commençant par le joueur) : ${sol.join(" ")}.
+${coupJoue?`Le joueur a joué ${coupJoue}, ce qui ne marchait pas.`:"Le joueur a demandé la solution."}
 Explique-lui la solution.`;
 }
 function iaQuestionConseil(k){
   const g=new Chess(k.fen),best=g.move(uciCoup(k.E0.coup));
   const camp=C.partie.camp==="w"?"blancs":"noirs";
-  return `Débrief d'une partie. L'enfant joue les ${camp}.
+  return `Débrief d'une partie. Le joueur joue les ${camp}.
 ${iaPosition(k.fen)}
-L'enfant a joué ${k.m.san}. Le moteur préférait ${best?best.san:"un autre coup"} (${k.E0.score>=10000?"il y avait un mat":k.E1.score>=10000?"le coup joué permettait un mat":`le coup joué perdait environ ${Math.round(k.perte/100)} pion(s) d'avantage`}).
+Le joueur a joué ${k.m.san}. Le moteur préférait ${best?best.san:"un autre coup"} (${k.E0.score>=10000?"il y avait un mat":k.E1.score>=10000?"le coup joué permettait un mat":`le coup joué perdait environ ${Math.round(k.perte/100)} pion(s) d'avantage`}).
 Constat du moteur : ${cPhrase(k).replace(/<[^>]+>/g,"")}
 Explique-lui simplement l'erreur et le meilleur coup.`;
 }

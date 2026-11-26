@@ -2,7 +2,8 @@
    Tout est hors ligne. Données gardées dans la sauvegarde : etoiles, quete, conquis, joute. */
 
 /* ---------- Étoiles : 3 sans indice, 2 avec un indice, 1 avec deux ---------- */
-function etoilesDe(nIndices){return nIndices<=0?3:nIndices===1?2:1;}
+// Lot 15 : le barème dépend de l'âge (REGLES dans profile.js) : indices gratuits pour les petits, plus sévère pour les adultes.
+function etoilesDe(nIndices){return REG().etoiles(nIndices);}
 function etoilesHTML(n){return `<span class="etoiles" aria-label="${n} étoile${n>1?"s":""} sur 3">${"★".repeat(n)}<i>${"★".repeat(3-n)}</i></span>`;}
 function noterEtoiles(id,n){S.etoiles[id]=Math.max(S.etoiles[id]||0,n);}
 function totalEtoiles(){let t=0;for(const k in S.etoiles)t+=S.etoiles[k];return t;}
@@ -15,7 +16,8 @@ function queteDuJour(){
   const jour=jourCle();
   if(S.quete&&S.quete.jour===jour&&S.quete.ids.every(id=>P.some(p=>p.id===id)))return S.quete;
   const r=hasardGraine(jour+(S.nom||"")),faits=new Set(S.reussis),ids=[];
-  const themes=Object.keys(THEMES).sort(()=>r()-.5).slice(0,5);
+  const tous=Object.keys(THEMES).filter(themePermis),themes=[];
+  while(themes.length<5){const t=tous.sort(()=>r()-.5);themes.push(...t.slice(0,5-themes.length));} // les petits ont moins de thèmes : on les répète
   for(const t of themes){
     let c=P.filter(p=>p.t===t&&!faits.has(p.id)&&Math.abs(p.r-S.cote)<220);
     if(!c.length)c=P.filter(p=>p.t===t&&Math.abs(p.r-S.cote)<400);
