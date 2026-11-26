@@ -5,7 +5,7 @@ Jeu d'échecs d'entraînement pour un enfant de 8 ans qui joue déjà relativeme
 Licence : GPL-3 (fichier `LICENSE`), imposée par Stockfish.
 
 ## Public et ton
-- Joueurs (lot 15) : la famille, avec des règles selon l'âge (`REGLES` dans `js/profile.js`) : Jean-François et Eva (adultes), Charles (8 ans, lecteur), Gauthier (5 ans, débutant). Phrases courtes, vocabulaire simple, tutoiement, ton encourageant.
+- Joueurs (lot 15) : la famille, avec des règles selon l'âge (`REGLES` dans `js/profile.js`) : Jean-François et Eva (adultes), Charles (8 ans, lecteur), Gautier (5 ans, débutant). Phrases courtes, vocabulaire simple, tutoiement, ton encourageant.
 - Toute l'interface est en français.
 - Univers : chevaliers (grades Page → Duc, salle d'armes, tournoi, conseil de guerre, blason).
 

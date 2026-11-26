@@ -123,10 +123,10 @@ Demande de Jean-François (2026-11-24) : points 1 à 6 de la liste proposée, pe
 - ⏳ Essai sur la tablette ; choix des ouvertures et durée des pendules à ajuster avec le joueur.
 
 ## Lot 15 — Profils famille et règles selon l'âge ✅ (sauf essai sur tablette)
-Demande de Jean-François (2026-11-26) : un profil par joueur (Jean-François, Eva, Charles, Gauthier), suivi des progrès par profil, niveau, règles, exigences et conseils adaptés à l'âge, rendu plus ludique.
+Demande de Jean-François (2026-11-26) : un profil par joueur (Jean-François, Eva, Charles, Gautier), suivi des progrès par profil, niveau, règles, exigences et conseils adaptés à l'âge, rendu plus ludique.
 - ✅ Écran « Qui joue aujourd'hui ? » à chaque visite (écussons : roi, dame, cavalier, tour) ; écusson du joueur en haut pour changer ; une sauvegarde par joueur.
 - ✅ L'ancienne progression est attribuée une fois (question à l'écran) et copiée ; l'originale reste intacte.
-- ✅ Règles par âge (`REGLES` dans `js/profile.js`) : petits (Gauthier, 5 ans) : mode « Les pièces » (12 étapes, une pièce et des pions à manger), seulement Mat en 1 et Pièce gratuite, indices gratuits, Marmiton (nouvel adversaire très facile), Page et Écuyer, annulation sans limite, pas de pendule, voix qui lit les messages, interface agrandie. Enfants (Charles, 8 ans) : comme avant. Adultes (Jean-François, Eva) : cote de départ 1100, un indice coûte deux étoiles, pas de joker, pas de points des coups possibles ni d'explication des coups impossibles (réglable), consignes techniques.
+- ✅ Règles par âge (`REGLES` dans `js/profile.js`) : petits (Gautier, 5 ans) : mode « Les pièces » (12 étapes, une pièce et des pions à manger), seulement Mat en 1 et Pièce gratuite, indices gratuits, Marmiton (nouvel adversaire très facile), Page et Écuyer, annulation sans limite, pas de pendule, voix qui lit les messages, interface agrandie. Enfants (Charles, 8 ans) : comme avant. Adultes (Jean-François, Eva) : cote de départ 1100, un indice coûte deux étoiles, pas de joker, pas de points des coups possibles ni d'explication des coups impossibles (réglable), consignes techniques.
 - ✅ Astuces et explications du mode connecté adaptées à l'âge.
 - ✅ « Mes progrès » dans le blason : épreuves des 14 derniers jours, semaine comparée à la précédente, thèmes en progrès, thème à travailler.
 - ✅ Habillage : couleur du joueur, onglets avec icônes, parchemin clair pour les enfants, boutons en relief.
