@@ -32,12 +32,12 @@ function choisir(){
   if(filtre==="quete"){const q=queteSuivante();if(q)return q;filtre="tous";}
   if(filtre==="menace")filtre="tous";
   const recents=new Set(S.vus.slice(-12));
-  const ok=p=>(filtre==="tous"||p.t===filtre)&&p.id!==(PZ&&PZ.id);
+  const ok=p=>(filtre==="tous"?themePermis(p.t):p.t===filtre)&&p.id!==(PZ&&PZ.id);
   const revoir=S.aRevoir.map(id=>P.find(p=>p.id===id)).filter(p=>p&&ok(p)&&!recents.has(p.id));
   if(revoir.length&&Math.random()<.25)return revoir[0];
   let t=filtre;
   if(filtre==="tous"){
-    const nb={};for(const p of P)nb[p.t]=(nb[p.t]||0)+1;
+    const nb={};for(const p of P)if(themePermis(p.t))nb[p.t]=(nb[p.t]||0)+1;
     // de 0,4 (tout réussi) à 2 (tout raté), réduit pour un thème qui a peu d'épreuves
     t=tirage(Object.keys(nb).map(k=>[k,(.4+(1-tauxTheme(k))*1.6)*Math.min(1,nb[k]/20)]));
   }
@@ -58,18 +58,19 @@ function charger(p){
   draw();clearArrows();
   const blanc=camp==="w";
   $("trait").className="trait "+(blanc?"w":"b");
-  $("mTitre").textContent=(blanc?"Les blancs":"Les noirs")+" jouent";$("mTexte").textContent=BUT[p.t]||"";$("mTheme").textContent=THEMES[p.t];
+  $("mTitre").textContent=(blanc?"Les blancs":"Les noirs")+" jouent";$("mTexte").textContent=butDe(p.t);$("mTheme").textContent=THEMES[p.t];
   $("sceau").className="sceau";$("bExplique").hidden=true;
   $("bIndice").disabled=!!p.a||J.actif;$("bSolution").disabled=!!p.a||J.actif;$("bIndice").textContent="Indice";
   if(p.a){
     $("parch").innerHTML=`<p>Tu joues les <b>${blanc?"blancs":"noirs"}</b>. Regarde bien le coup de l'adversaire…</p>`;
     plus(()=>{const m=G.move(PZ.line[0]);animMove(m);step_=1;etat="jeu";$("bIndice").disabled=J.actif;$("bSolution").disabled=J.actif;
       $("parch").innerHTML=`<p>L'adversaire a joué <b>${fr(m.san)}</b>. À toi ! Touche une pièce, puis la case où tu veux la jouer.</p>`;},700);
-  } else $("parch").innerHTML=`<p>Tu joues les <b>${blanc?"blancs":"noirs"}</b>. Touche une pièce, puis la case où tu veux la jouer.</p>`;
+  } else $("parch").innerHTML=`<p>Tu joues les <b>${blanc?"blancs":"noirs"}</b>. ${ageCat()==="adulte"?"À vous de trouver.":"Touche une pièce, puis la case où tu veux la jouer."}</p>${astuceHTML(p.t)}`;
 }
 function tap(sq){
   const conseil=mode==="tournoi"&&!$("cJeu").hidden,tournoi=mode==="tournoi"&&!conseil,duel=mode==="duel";
   if(mode==="salle"&&SM==="menace"){menaceToucher(sq);return;}
+  if(mode==="salle"&&SM==="pieces"){piecesToucher(sq);return;}
   if(duel?!dPeutJouer():conseil?!cPeutJouer():tournoi?!tPeutJouer():(etat!=="jeu"&&etat!=="corrige"))return;
   const p=G.get(sq);
   if(sel&&sel!==sq){
@@ -84,7 +85,7 @@ function tap(sq){
   clearMarks();
   if(p&&p.color===G.turn()&&sel!==sq){
     sel=sq;sqEl(sq).classList.add("sel");pieces[sq]&&pieces[sq].classList.add("up");setTimeout(()=>pieces[sq]&&pieces[sq].classList.remove("up"),260);
-    G.moves({square:sq,verbose:true}).forEach(m=>{const s=document.createElement("div");s.className=m.captured?"ring":"dot";sqEl(m.to).appendChild(s);});
+    if(S.aides)G.moves({square:sq,verbose:true}).forEach(m=>{const s=document.createElement("div");s.className=m.captured?"ring":"dot";sqEl(m.to).appendChild(s);});
   } else sel=null;
 }
 function jouer(vm){
@@ -160,6 +161,7 @@ function bilan(ok,gain){
   if(!ok||indice>=2)S.aRevoir.push(PZ.id);S.aRevoir=S.aRevoir.slice(-50);
   if(ok&&!S.reussis.includes(PZ.id))S.reussis.push(PZ.id);
   S.hist.unshift({id:PZ.id,t:PZ.t,ok,d:Date.now()});S.hist=S.hist.slice(0,12);
+  noterJour(PZ.t,ok);
   save();majEntete();hautsVerifier();
 }
 function majEntete(){
@@ -167,13 +169,15 @@ function majEntete(){
   $("gradeTop").textContent=g[1];$("xpTxt").textContent=S.xp+" XP";
   $("xpBar").style.width=(n?Math.round((S.xp-g[0])/(n[0]-g[0])*100):100)+"%";
   $("salut").textContent=S.nom.trim()?`En garde, ${S.nom.trim()} !`:"Entraîne-toi, jeune écuyer";
+  majAvatar();
 }
 function majBlason(){
-  iaMajReglages();majApparence();
+  iaMajReglages();majJoueur();majApparence();
   const[g,n]=gradeDe(S.xp);
   $("gGrade").textContent=g[1];$("gProchain").textContent=n?`Encore ${n[0]-S.xp} XP pour devenir ${n[1]}`:"Grade le plus haut atteint !";
   $("nom").value=S.nom;$("sReussi").textContent=S.reussi;$("sSerie").textContent=S.best;$("sCote").textContent=S.cote;$("sEtoiles").textContent=totalEtoiles();$("sJoute").textContent=S.joute.best;$("sRoyaume").textContent=`${LIEUX.filter(lieuConquis).length}/${LIEUX.length}`;
-  $("themes").innerHTML=Object.keys(THEMES).map(k=>{const t=S.th[k]||{ok:0,n:0};const pc=t.n?Math.round(t.ok/t.n*100):0;
+  majProgres();
+  $("themes").innerHTML=Object.keys(THEMES).filter(themePermis).map(k=>{const t=S.th[k]||{ok:0,n:0};const pc=t.n?Math.round(t.ok/t.n*100):0;
     return `<div class="th"><span>${THEMES[k]}</span><em>${t.ok}/${t.n}</em><div class="bar"><i style="width:${pc}%"></i></div></div>`;}).join("")+
     `<div class="th"><span>Trouve la menace</span><em>${S.menaces.ok}/${S.menaces.n}</em><div class="bar"><i style="width:${S.menaces.n?Math.round(S.menaces.ok/S.menaces.n*100):0}%"></i></div></div>`+
     `<div class="th"><span>Ouvertures apprises</span><em>${OUVERTURES.filter(o=>S.ouvertures[o.k]).length}/${OUVERTURES.length}</em><div class="bar"><i style="width:${Math.round(OUVERTURES.filter(o=>S.ouvertures[o.k]).length/OUVERTURES.length*100)}%"></i></div></div>`;
@@ -192,6 +196,7 @@ function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;
 const NOMS={p:"Le pion",n:"Le cavalier",b:"Le fou",r:"La tour",q:"La dame",k:"Le roi"};
 function pourquoiPas(de,a,dire){
   const p=G.get(de);if(!p)return;
+  if(!S.aides){dire(`<span class="ko">Coup illégal.</span>`);return;} // sans aides (adultes) : pas d'explication
   const g=new Chess(G.fen()),echecAvant=g.in_check();
   let msg;
   if(p.type==="k"&&Math.abs(files.indexOf(de[0])-files.indexOf(a[0]))===2&&de[1]===a[1])
@@ -220,14 +225,14 @@ B.addEventListener("pointermove",e=>{if(!glis)return;const dx=e.clientX-glis.x,d
 function finGlisse(e){if(!glis)return;const g=glis;glis=null;if(!g.bouge)return;
   g.el.style.zIndex="";place(g.el,g.de);const sq=caseDe(e);if(sq&&sq!==g.de&&sel===g.de){poseDirecte=true;tap(sq);poseDirecte=false;}}
 B.addEventListener("pointerup",finGlisse);B.addEventListener("pointercancel",e=>{if(glis){glis.el.style.zIndex="";place(glis.el,glis.de);glis=null;}});
-$("bSuivant").onclick=()=>{ac();if(ch.dataset.f==="menace")menaceSuivante();else charger(choisir());};
+$("bSuivant").onclick=()=>{ac();if(ch.dataset.f==="menace")menaceSuivante();else if(ch.dataset.f==="pieces")piecesSuivante();else charger(choisir());};
 /* Indice gradué : 1) la pièce à jouer, 2) la case d'arrivée, 3) la solution. Chaque indice coûte une étoile. */
 $("bIndice").onclick=()=>{if(SM==="lecon"){if(etat==="jeu"&&L.passe===2){leconMontrer();$("parch").innerHTML=`<p>Indice : suis la flèche verte.</p>`;}return;}
   if(SM)return;if(etat!=="jeu")return;const g=new Chess(G.fen());const mv=g.move(PZ.line[step_]);if(!mv)return;
   if(indice>=2){$("bSolution").onclick();return;}
   indice++;clearMarks();sel=null;sqEl(mv.from).classList.add("hint");
-  if(indice===1){$("parch").innerHTML=`<p>Indice 1 : la pièce qui brille est celle à jouer. ${etoilesHTML(2)}</p>`;$("bIndice").textContent="Indice 2";}
-  else{sqEl(mv.to).classList.add("hint");$("parch").innerHTML=`<p>Indice 2 : elle va sur l'autre case qui brille. ${etoilesHTML(1)}</p>`;$("bIndice").textContent="Solution";}};
+  if(indice===1){$("parch").innerHTML=`<p>Indice 1 : la pièce qui brille est celle à jouer. ${etoilesHTML(etoilesDe(1))}</p>`;$("bIndice").textContent="Indice 2";}
+  else{sqEl(mv.to).classList.add("hint");$("parch").innerHTML=`<p>Indice 2 : elle va sur l'autre case qui brille. ${etoilesHTML(etoilesDe(2))}</p>`;$("bIndice").textContent="Solution";}};
 $("bSolution").onclick=()=>{if(SM==="menace"){menaceSolution();return;}if(SM)return;if(etat!=="jeu")return;indice=3;bilan(false,0);$("parch").innerHTML=`<p><span class="ko">Voici la solution.</span> <b>Joue toi-même le coup de la flèche verte</b> pour voir ce qui se passe.</p>`;corriger();$("bIndice").disabled=true;$("bSolution").disabled=true;iaBouton("bExplique","parch",()=>iaQuestionEpreuve(null));finEpreuve(false);};
 $("bSon").onclick=()=>{S.son=!S.son;save();$("bSon").textContent="Son : "+(S.son?"oui":"non");$("bSon").setAttribute("aria-pressed",S.son);};
 $("bSon").textContent="Son : "+(S.son?"oui":"non");
@@ -247,6 +252,7 @@ function onglet(v){
     $("sSlot").appendChild($("plateau"));
     if(SM==="lecon")leconDepart(); // la leçon reprend au début de la passe
     else if(SM==="menace")menaceAfficher();
+    else if(SM==="pieces")piecesAfficher();
     else if(etat==="attente")charger(PZ); // une réponse adverse était en route : on reprend l'épreuve
     else if(etat==="suite"){etat="fini";G=new Chess(PZ.fen);for(let i=0;i<step_;i++)G.move(PZ.line[i]);draw();} // la correction s'arrête là
     else{G=new Chess(PZ.fen);for(let i=0;i<step_;i++)G.move(PZ.line[i]);flip=(PZ.a?(new Chess(PZ.fen).turn()==="w"?"b":"w"):new Chess(PZ.fen).turn())==="b";draw();if(etat==="corrige")corriger();}
@@ -261,8 +267,10 @@ function onglet(v){
 $("parties").onclick=e=>{const b=e.target.closest("button[data-p]");if(b)conseilOuvrir(+b.dataset.p);};
 $("tSalle").onclick=()=>onglet("salle");$("tTournoiB").onclick=()=>onglet("tournoi");$("tBlason").onclick=()=>onglet("blason");$("tDuelB").onclick=()=>onglet("duel");
 const ch=$("chips");ch.dataset.f="tous";
-ch.innerHTML=`<button type="button" class="chip special" data-k="quete">Quête du jour</button><button type="button" class="chip special" data-k="carte">Carte du royaume</button><button type="button" class="chip special" data-k="joute">Joute 3 min</button><button type="button" class="chip special" data-k="ouvertures">Ouvertures</button><button type="button" class="chip special" data-k="menace">Trouve la menace</button>`+
-  [["tous","Toutes les bottes"],...Object.entries(THEMES)].map(([k,v])=>`<button type="button" class="chip${k==="tous"?" on":""}" data-k="${k}">${v}</button>`).join("");
+// Lot 15 : les petits n'ont que la quête, la carte et leurs thèmes.
+ch.innerHTML=[["pieces","Les pièces"],["quete","Quête du jour"],["carte","Carte du royaume"],["joute","Joute 3 min"],["ouvertures","Ouvertures"],["menace","Trouve la menace"]]
+  .filter(([k])=>!REG().extras||REG().extras.includes(k)).map(([k,v])=>`<button type="button" class="chip special" data-k="${k}">${v}</button>`).join("")+
+  [["tous",REG().themes?"Toutes mes bottes":"Toutes les bottes"],...Object.entries(THEMES).filter(([k])=>themePermis(k))].map(([k,v])=>`<button type="button" class="chip${k==="tous"?" on":""}" data-k="${k}">${v}</button>`).join("");
 function choisirFiltre(k){
   if(J.actif)jouteArreter();
   ch.dataset.f=k;ch.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c.dataset.k===k));
@@ -272,6 +280,7 @@ function choisirFiltre(k){
 ch.onclick=e=>{const b=e.target.closest(".chip");if(!b)return;const k=b.dataset.k;ac();
   if(k==="carte"){ouvrirCarte();return;}
   if(k==="ouvertures"){leconListe();return;}
+  if(k==="pieces"){if(J.actif)jouteArreter();ch.dataset.f="pieces";ch.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c===b));piecesDemarrer();return;}
   if(k==="menace"){if(J.actif)jouteArreter();ch.dataset.f="menace";ch.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c===b));menaceSuivante();return;}
   if(k==="joute"){ch.dataset.f="tous";ch.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c===b));jouteDemarrer();return;}
   choisirFiltre(k);};
@@ -291,6 +300,7 @@ $("apPlein").onclick=()=>{S.pleinEcran=!S.pleinEcran;save();majPlein();
   else if(S.pleinEcran){pleinTente=false;pleinEcran();}};
 majPlein();
 majEntete();charger(choisir());
+if(REG().debut==="pieces"&&!S.piecesFini){const b=ch.querySelector('.chip[data-k="pieces"]');b&&b.click();} // Gauthier : on commence par apprendre les pièces
 if(tReprendre()){tMsg(`Ta partie contre <b>${T.niv.nom}</b> t'attend. À toi de jouer !`);}
 // Duel à distance : reprise d'un duel en cours, ou lien d'invitation (#duel=CODE)
 dReprendre().then(()=>{const m=location.hash.match(/duel=([A-Za-z0-9-]+)/);if(!m)return;

@@ -7,7 +7,10 @@
    Réglages issus de simulations (lot 12) : chaque niveau gagne environ 3 parties sur 4 contre le précédent,
    au lieu de 9 sur 10 avant ; le Roi est le défi final. À ajuster après les essais avec le joueur. */
 /* Chaque niveau est un chevalier nommé (lot 9) : blason (fond, motif), phrase d'accueil, de victoire et de défaite. */
+// Le Marmiton (lot 15) : pour les plus petits, il joue presque une fois sur deux au hasard. Il n'est pas issu des simulations.
 const NIVEAUX=[
+  {k:"marmiton",nom:"Le Marmiton",skill:0,depth:1,hasard:.6,xp:15,chev:"Pépin le marmiton",bl:["#d9822b","#fff4c4"],
+    salut:"Je suis Pépin, je travaille aux cuisines du château. Je viens d'apprendre les échecs !",gagne:"Oh ! J'ai gagné ! On rejoue ?",perd:"Bravo ! Tu m'as battu. Tristan le Page t'attend."},
   {k:"page",nom:"Le Page",skill:0,depth:1,hasard:.3,xp:20,chev:"Messire Tristan",bl:["#2f8f5b","#f3dc94"],
     salut:"Je suis Tristan, page du château. Je débute, comme toi… ou presque !",gagne:"Ha ! Même un page peut gagner. Revanche ?",perd:"Bien joué ! Tu as battu Tristan. L'Écuyer t'attend."},
   {k:"ecuyer",nom:"L'Écuyer",skill:1,depth:2,hasard:.2,xp:30,chev:"Dame Iseult",bl:["#24427f","#e3b84b"],
@@ -67,8 +70,9 @@ const MOTEUR={
 /* ---------- État de la partie ----------
    S.tournoi.partie = {niv, camp, coups:[SAN]} : la partie en cours est gardée sur l'appareil. */
 const T={g:null,niv:null,camp:"w",etat:"choix",jeton:0,dernierScore:null,fen:null,jokers:3,pendule:0,temps:null};
-const JOKERS=3; // coups annulables par partie, aux niveaux Page et Écuyer seulement
-function tPeutAnnuler(){return T.g&&!T.niv.finale&&["page","ecuyer"].includes(T.niv.k)&&T.etat!=="fini";}
+const JOKERS=REG().jokers; // coups annulables par partie (voir REGLES dans profile.js)
+// Jokers selon l'âge (lot 15) : sans limite pour les petits, aux premiers niveaux pour les enfants, aucun pour les adultes.
+function tPeutAnnuler(){const r=REG();return T.g&&!T.niv.finale&&r.jokers>0&&(!r.jokersNiv||r.jokersNiv.includes(T.niv.k))&&T.etat!=="fini";}
 function tPlus(fn,ms){const n=T.jeton;setTimeout(()=>{if(n===T.jeton)fn();},ms);}
 function tMsg(h){$("tParch").innerHTML=`<p>${h}</p>`;}
 function tPeutJouer(){return T.etat==="joueur"&&T.g&&T.g.turn()===T.camp;}
@@ -81,7 +85,7 @@ function tEntete(){
   const n=T.niv;
   $("tTitre").textContent=n?(n.finale?n.finale.nom:`${n.chev} t'attend`):"Le tournoi";
   $("tNiv").textContent=n?(n.finale?"Finale":n.nom.replace(/^(Le |L')/,"")):"—";
-  const a=$("tAnnuler");a.hidden=!tPeutAnnuler();a.textContent=`Annuler (${T.jokers})`;
+  const a=$("tAnnuler");a.hidden=!tPeutAnnuler();a.textContent=T.jokers>=99?"Annuler":`Annuler (${T.jokers})`;
   a.disabled=!T.jokers||!tPeutJouer()||T.g.history().length<2;
   $("tTrait").className="trait "+(T.g&&T.g.turn()==="b"?"b":"w");
   penduleAff("tPendule",T.g?T.temps:null,T.camp,n?n.chev:"",T.g&&T.etat!=="fini"&&T.g.history().length?T.g.turn():null);
@@ -219,7 +223,7 @@ function tAnnuler(){ // joker : on reprend son dernier coup et la réponse de l'
   if(!tPeutAnnuler()||!tPeutJouer()||!T.jokers||T.g.history().length<2)return;
   T.g.undo();T.g.undo();T.jokers--;T.dernierScore=null;
   tAfficher();tSauver();tEntete();
-  tMsg(`Coup annulé. Il te reste ${T.jokers} joker${T.jokers>1?"s":""} pour cette partie. Réfléchis bien !`);
+  tMsg(T.jokers>=90?"Coup annulé. Réfléchis bien, et rejoue !":`Coup annulé. Il te reste ${T.jokers} joker${T.jokers>1?"s":""} pour cette partie. Réfléchis bien !`);
 }
 function tDuel(k){const n=nivDe(k);$("tDuel").innerHTML=`${portrait(n)}<div><b>${n.chev}</b><span>${n.nom}</span><p>« ${n.salut} »</p></div>`;}
 function tChoixMaj(){
@@ -229,11 +233,12 @@ function tChoixMaj(){
 /* ---------- Écran de choix ---------- */
 (function(){
   const nv=$("tNiveaux"),cp=$("tCamps");
-  nv.innerHTML=NIVEAUX.map((n,i)=>`<button type="button" class="chip${i===0?" on":""}" data-k="${n.k}">${n.nom}</button>`).join("");
+  const permis=NIVEAUX.filter(n=>!REG().niveaux||REG().niveaux.includes(n.k));
+  nv.innerHTML=permis.map((n,i)=>`<button type="button" class="chip${i===0?" on":""}" data-k="${n.k}">${n.nom}</button>`).join("");
   cp.innerHTML=[["w","Les blancs"],["b","Les noirs"],["hasard","Au hasard"]].map(([k,v],i)=>`<button type="button" class="chip${i===0?" on":""}" data-k="${k}">${v}</button>`).join("");
   const radio=el=>el.onclick=e=>{const b=e.target.closest(".chip");if(!b)return;el.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c===b));};
   radio(nv);radio(cp);
-  nv.addEventListener("click",()=>tDuel(nv.querySelector(".on").dataset.k));tDuel("page");tChoixMaj();
+  nv.addEventListener("click",()=>tDuel(nv.querySelector(".on").dataset.k));tDuel(permis[0].k);tChoixMaj();
   $("tFinales").onclick=e=>{const b=e.target.closest(".chip");if(!b)return;ac();MOTEUR.demarrer();$("tConseil").hidden=true;tCommencer("finale:"+b.dataset.f,"w");$("tAbandon").disabled=false;};
   $("tAnnuler").onclick=tAnnuler;
   $("tGo").onclick=()=>{ac();MOTEUR.demarrer();$("tConseil").hidden=true;tCommencer(nv.querySelector(".on").dataset.k,cp.querySelector(".on").dataset.k,penduleChoisie("tPendules"));$("tAbandon").disabled=false;};

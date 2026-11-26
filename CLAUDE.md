@@ -5,7 +5,7 @@ Jeu d'échecs d'entraînement pour un enfant de 8 ans qui joue déjà relativeme
 Licence : GPL-3 (fichier `LICENSE`), imposée par Stockfish.
 
 ## Public et ton
-- Joueur : enfant de 8 ans, lecteur. Phrases courtes, vocabulaire simple, tutoiement, ton encourageant.
+- Joueurs (lot 15) : la famille, avec des règles selon l'âge (`REGLES` dans `js/profile.js`) : Jean-François et Eva (adultes), Charles (8 ans, lecteur), Gauthier (5 ans, débutant). Phrases courtes, vocabulaire simple, tutoiement, ton encourageant.
 - Toute l'interface est en français.
 - Univers : chevaliers (grades Page → Duc, salle d'armes, tournoi, conseil de guerre, blason).
 
@@ -17,8 +17,8 @@ Licence : GPL-3 (fichier `LICENSE`), imposée par Stockfish.
 - Toute ressource (police, script, image, son) est dans le dépôt et listée dans `sw.js`. Changer `V` dans `sw.js` à chaque version.
 
 ## Architecture
-- `index.html` : squelette de la page ; charge `css/app.css` puis les scripts dans l'ordre ci-dessous (scripts classiques, sans module ni build).
-- `js/puzzles.js` (thèmes, problèmes faits main, finales à gagner, ouvertures, détection des menaces), `js/lichess.js` (problèmes Lichess, généré par `tools/importer-lichess.js` via `.github/workflows/import-lichess.yml`, ne pas modifier à la main), `js/profile.js` (grades, sauvegarde), `js/sound.js` (sons), `js/board.js` (échiquier, animations), `js/tournoi.js` (partie contre Stockfish), `js/conseil.js` (débrief des parties), `js/connecte.js` (mode connecté : explications par l'API Claude), `js/recompenses.js` (hauts faits, apparence, sceau, adoubement), `js/quetes.js` (étoiles, quête du jour, carte du royaume, joute contre la montre), `js/duel.js` (duel à distance entre deux appareils), `js/partie.js` (promotion, liste des coups, pendule, partie nulle expliquée), `js/ecole.js` (leçons d'ouvertures, trouve la menace), `js/app.js` (logique d'épreuve, onglets, blason, interface).
+- `index.html` : squelette de la page ; charge `css/app.css` et `css/famille.css` puis les scripts dans l'ordre ci-dessous (scripts classiques, sans module ni build).
+- `js/puzzles.js` (thèmes, problèmes faits main, finales à gagner, ouvertures, détection des menaces), `js/lichess.js` (problèmes Lichess, généré par `tools/importer-lichess.js` via `.github/workflows/import-lichess.yml`, ne pas modifier à la main), `js/profile.js` (grades, sauvegarde), `js/sound.js` (sons), `js/board.js` (échiquier, animations), `js/tournoi.js` (partie contre Stockfish), `js/conseil.js` (débrief des parties), `js/connecte.js` (mode connecté : explications par l'API Claude), `js/recompenses.js` (hauts faits, apparence, sceau, adoubement), `js/quetes.js` (étoiles, quête du jour, carte du royaume, joute contre la montre), `js/duel.js` (duel à distance entre deux appareils), `js/partie.js` (promotion, liste des coups, pendule, partie nulle expliquée), `js/ecole.js` (leçons d'ouvertures, trouve la menace), `js/famille.js` (choix du joueur, règles et conseils selon l'âge, « Les pièces », voix, progrès), `js/app.js` (logique d'épreuve, onglets, blason, interface).
 - `vendor/stockfish/` : Stockfish.js 19 lite mono-fil (npm `stockfish` 19.0.1, GPL-3), ne pas modifier ; lancé en Web Worker.
 - `tools/verif-lib.js` : règles de vérification partagées ; `tools/verifier.js` : vérification des problèmes ; `tools/verifier-cache.js` : contrôle de la liste de `sw.js`. Lancés par `.github/workflows/verifier.yml`.
 - `chess.js` : règles du jeu (chess.js 0.10.3, BSD-2), ne pas modifier.
@@ -28,7 +28,7 @@ Licence : GPL-3 (fichier `LICENSE`), imposée par Stockfish.
 ## Règles de travail
 - Une branche par lot (`lot-1-socle`, …), fusion dans `main` après vérification.
 - Chaque problème d'échecs ajouté doit être vérifié automatiquement (position légale, ligne jouable, mat réel pour les thèmes de mat, gain matériel pour les autres).
-- Progression enregistrée dans `localStorage` (clé `salle-armes-v1`) ; toute évolution du format doit migrer les anciennes données, jamais les effacer.
+- Progression enregistrée dans `localStorage`, une sauvegarde par joueur (clé `salle-armes-v1:<id>`, registre `salle-armes-famille` ; l'ancienne clé `salle-armes-v1` est gardée intacte) ; toute évolution du format doit migrer les anciennes données, jamais les effacer.
 - Animations fluides sur tablette milieu de gamme ; respecter `prefers-reduced-motion`.
 - Ressources tierces : licence libre vérifiée et citée dans le README.
 - Clé d'API (lot 5) : saisie par l'utilisateur, stockée sur l'appareil, jamais dans le dépôt.
