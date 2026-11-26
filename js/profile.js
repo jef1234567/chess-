@@ -45,13 +45,15 @@ const FAMILLE_DEFAUT=[
   {id:"jf",nom:"Jean-François",age:null,adulte:true,c:"#24427f",e:"K"},
   {id:"eva",nom:"Eva",age:36,adulte:true,c:"#b8343e",e:"Q"},
   {id:"charles",nom:"Charles",age:8,adulte:false,c:"#2f8f5b",e:"N"},
-  {id:"gauthier",nom:"Gauthier",age:5,adulte:false,c:"#a8772e",e:"R"}];
+  {id:"gauthier",nom:"Gautier",age:5,adulte:false,c:"#a8772e",e:"R"}];
 function lireJSON(k){try{const r=localStorage.getItem(k);return r?JSON.parse(r):null;}catch(e){return null;}}
 function ecrireJSON(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 const FAM=(()=>{const f=lireJSON(CLE_FAMILLE);
   if(f&&Array.isArray(f.profils)&&f.profils.length)return f;
   return {profils:FAMILLE_DEFAUT.map(p=>Object.assign({},p)),dernier:"jf"};})();
 function famSave(){ecrireJSON(CLE_FAMILLE,FAM);}
+// Correction du prénom (2026-11-26) : « Gautier », sans h. L'identifiant « gauthier » reste, pour garder la sauvegarde.
+for(const p of FAM.profils)if(p.id==="gauthier"&&p.nom==="Gauthier"){p.nom="Gautier";famSave();}
 function cleProfil(id){return CLE_ANCIENNE+":"+id;}
 function ancienneEnAttente(){return !("ancien" in FAM)&&!!lireJSON(CLE_ANCIENNE);}
 let ACTIF=null;try{ACTIF=sessionStorage.getItem("salle-armes-actif");}catch(e){}
@@ -80,5 +82,6 @@ function chargerProfil(id){
 }
 let S=defauts();
 if(!ancienneEnAttente())S=chargerProfil(PROFIL.id);
+if(S.nom==="Gauthier")S.nom="Gautier";
 function save(){if(ancienneEnAttente())return;ecrireJSON(cleProfil(PROFIL.id),S);}
 function gradeDe(xp){let g=GRADES[0],n=null;for(let i=0;i<GRADES.length;i++){if(xp>=GRADES[i][0]){g=GRADES[i];n=GRADES[i+1]||null;}}return[g,n];}

@@ -300,7 +300,7 @@ $("apPlein").onclick=()=>{S.pleinEcran=!S.pleinEcran;save();majPlein();
   else if(S.pleinEcran){pleinTente=false;pleinEcran();}};
 majPlein();
 majEntete();charger(choisir());
-if(REG().debut==="pieces"&&!S.piecesFini){const b=ch.querySelector('.chip[data-k="pieces"]');b&&b.click();} // Gauthier : on commence par apprendre les pièces
+if(REG().debut==="pieces"&&!S.piecesFini){const b=ch.querySelector('.chip[data-k="pieces"]');b&&b.click();} // Gautier : on commence par apprendre les pièces
 if(tReprendre()){tMsg(`Ta partie contre <b>${T.niv.nom}</b> t'attend. À toi de jouer !`);}
 // Duel à distance : reprise d'un duel en cours, ou lien d'invitation (#duel=CODE)
 dReprendre().then(()=>{const m=location.hash.match(/duel=([A-Za-z0-9-]+)/);if(!m)return;
